@@ -1,0 +1,10 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+find_dependency(ltla_byteme CONFIG REQUIRED)
+
+if(@GESEL_FIND_ZLIB@)
+    find_package(ZLIB)
+endif()
+
+include("${CMAKE_CURRENT_LIST_DIR}/gesel_geselTargets.cmake")
