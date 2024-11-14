@@ -19,10 +19,16 @@ inline std::vector<int32_t> load_ranges(const std::string& path) {
     std::vector<int32_t> output;
 
     bool valid = pb.valid();
-    int32_t line = 1;
+    int32_t line = 0;
+    constexpr int32_t max_line = std::numeric_limits<int32_t>::max();
+
     while (valid) {
         int32_t number = parse_integer_field<FieldType::LAST>(pb, valid, path, line);
         output.push_back(number);
+
+        if (line == max_line) {
+            throw std::runtime_error("number of lines should fit in a 32-bit integer"); 
+        }
         ++line;
     }
 
@@ -35,11 +41,18 @@ inline std::pair<std::vector<int32_t>, std::vector<int32_t> > load_ranges_with_s
     std::vector<int32_t> output_byte, output_size;
 
     bool valid = pb.valid();
-    int32_t line = 1;
+    int32_t line = 0;
+    constexpr int32_t max_line = std::numeric_limits<int32_t>::max();
+
     while (valid) {
         int32_t byte_size = parse_integer_field<FieldType::MIDDLE>(pb, valid, path, line);
         int32_t other_size = parse_integer_field<FieldType::LAST>(pb, valid, path, line);
+
+        if (line == max_line) {
+            throw std::runtime_error("number of lines should fit in a 32-bit integer"); 
+        }
         ++line;
+
         output_byte.push_back(byte_size);
         output_size.push_back(other_size);
     }
@@ -54,18 +67,24 @@ inline std::pair<std::vector<std::string>, std::vector<int32_t> > load_named_ran
     std::vector<int32_t> output_byte;
 
     bool valid = pb.valid();
-    int32_t line = 1;
+    int32_t line = 0;
+    constexpr int32_t max_line = std::numeric_limits<int32_t>::max();
+
     while (valid) {
         auto name = parse_string_field<FieldType::MIDDLE>(pb, valid, path, line);
         int32_t byte_size = parse_integer_field<FieldType::LAST>(pb, valid, path, line);
+
+        if (line == max_line) {
+            throw std::runtime_error("number of lines should fit in a 32-bit integer"); 
+        }
         ++line;
+
         output_name.push_back(name);
         output_byte.push_back(byte_size);
     }
 
     return std::make_pair(std::move(output_name), std::move(output_byte));
 }
-
 
 }
 

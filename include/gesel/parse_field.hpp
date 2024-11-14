@@ -6,6 +6,8 @@
 #include <string>
 #include <stdexcept>
 
+#include "utils.hpp"
+
 namespace gesel {
 
 namespace internal {
@@ -40,14 +42,14 @@ parse_integer_field(ByteSource_& pb, bool& valid, const std::string& path, int32
         }
 
         if (c < '0' || c > '9') {
-            throw std::runtime_error("non-digit character detected in '" + path + "' (line " + std::to_string(line) + ")");
+            throw std::runtime_error("non-digit character detected in '" + path + "' " + append_line_number(line));
         } else if (!valid) {
-            throw std::runtime_error("no terminating newline in '" + path + "' (line " + std::to_string(line) + ")");
+            throw std::runtime_error("no terminating newline in '" + path + "' " + append_line_number(line));
         }
 
         int32_t delta = c - '0';
         if (number == threshold && delta > max_remainder) {
-            throw std::runtime_error("32-bit integer overflow in '" + path + "' (line " + std::to_string(line) + ")");
+            throw std::runtime_error("32-bit integer overflow in '" + path + "' " + append_line_number(line));
         }
 
         has_leading_zero += (ndigits == 0 && delta == 0);
@@ -58,12 +60,12 @@ parse_integer_field(ByteSource_& pb, bool& valid, const std::string& path, int32
 
     if (number == 0) {
         if (ndigits > 1) {
-            throw std::runtime_error("leading zero detected in '" + path + "' (line " + std::to_string(line) + ")");
+            throw std::runtime_error("leading zero detected in '" + path + "' " + append_line_number(line));
         } else if (ndigits == 0) {
-            throw std::runtime_error("empty field detected in '" + path + "' (line " + std::to_string(line) + ")");
+            throw std::runtime_error("empty field detected in '" + path + "' " + append_line_number(line));
         }
     } else if (has_leading_zero) {
-        throw std::runtime_error("leading zero detected in '" + path + "' (line " + std::to_string(line) + ")");
+        throw std::runtime_error("leading zero detected in '" + path + "' " + append_line_number(line));
     }
 
     if constexpr(type_ == FieldType::UNKNOWN) {
@@ -96,9 +98,9 @@ parse_string_field(ByteSource_& pb, bool& valid, const std::string& path, int32_
         }
 
         if (c == '\t' || c == '\n') {
-            throw std::runtime_error("string containing a newline or tab in '" + path + "' (line " + std::to_string(line) + ")");
+            throw std::runtime_error("string containing a newline or tab in '" + path + "' " + append_line_number(line));
         } else if (!valid) {
-            throw std::runtime_error("no terminating newline in '" + path + "' (line " + std::to_string(line) + ")");
+            throw std::runtime_error("no terminating newline in '" + path + "' " + append_line_number(line));
         }
 
         value += c;

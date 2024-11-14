@@ -45,8 +45,8 @@ void check_indices(const std::string& path, int32_t index_limit, const std::vect
 
     std::vector<int32_t> raw_indices;
     typename std::conditional<has_gzip_, std::vector<int32_t>, bool>::type gzip_indices;
-    size_t line = 1;
-    const size_t num_ranges = ranges.size();
+    int32_t line = 0;
+    const int32_t num_ranges = ranges.size();
 
     while (raw_valid) {
         raw_indices.clear();
@@ -63,16 +63,16 @@ void check_indices(const std::string& path, int32_t index_limit, const std::vect
 
             int32_t cumulative = raw_indices.front();
             if (cumulative >= index_limit) {
-                throw std::runtime_error("out-of-range index in '" + path + "' (line " + std::to_string(line) + ")");
+                throw std::runtime_error("out-of-range index in '" + path + "' (line " + std::to_string(line + 1) + ")");
             }
 
             for (size_t i = 1, end = raw_indices.size(); i < end; ++i) {
                 auto delta = raw_indices[i];
                 if (delta == 0) {
-                    throw std::runtime_error("duplicate index in '" + path + "' (line " + std::to_string(line) + ")");
+                    throw std::runtime_error("duplicate index in '" + path + "' (line " + std::to_string(line + 1) + ")");
                 }
                 if (delta >= index_limit - cumulative) {
-                    throw std::runtime_error("out-of-range index in '" + path + "' (line " + std::to_string(line) + ")");
+                    throw std::runtime_error("out-of-range index in '" + path + "' (line " + std::to_string(line + 1) + ")");
                 }
                 cumulative += delta;
             }
@@ -80,11 +80,11 @@ void check_indices(const std::string& path, int32_t index_limit, const std::vect
             raw_p.advance();
         }
 
-        if (line > num_ranges) {
-            throw std::runtime_error("number of lines in '" + path + "' exceeds that expected from its '*.ranges.gz' file (line " + std::to_string(line) + ")");
+        if (line >= num_ranges) {
+            throw std::runtime_error("number of lines in '" + path + "' exceeds that expected from its '*.ranges.gz' file (line " + std::to_string(line + 1) + ")");
         }
-        if (raw_p.position() - raw_pos - 1 != static_cast<size_t>(ranges[line - 1])) {
-            throw std::runtime_error("number of bytes per line in '" + path + "' is not the same as that expected from the '*.ranges.gz' file (line " + std::to_string(line) + ")");
+        if (raw_p.position() - raw_pos - 1 != static_cast<size_t>(ranges[line])) {
+            throw std::runtime_error("number of bytes per line in '" + path + "' is not the same as that expected from the '*.ranges.gz' file (line " + std::to_string(line + 1) + ")");
         }
 
         if constexpr(has_gzip_) {
@@ -107,11 +107,11 @@ void check_indices(const std::string& path, int32_t index_limit, const std::vect
 
             size_t num_indices = raw_indices.size();
             if (num_indices != gzip_indices.size()) {
-                throw std::runtime_error("different indices between '" + path + "' and its Gzipped version (line " + std::to_string(line) + ")");
+                throw std::runtime_error("different indices between '" + path + "' and its Gzipped version (line " + std::to_string(line + 1) + ")");
             }
             for (size_t i = 0; i < num_indices; ++i) {
                 if (raw_indices[i] != gzip_indices[i]) {
-                    throw std::runtime_error("different indices between '" + path + "' and its Gzipped version (line " + std::to_string(line) + ")");
+                    throw std::runtime_error("different indices between '" + path + "' and its Gzipped version (line " + std::to_string(line + 1) + ")");
                 }
             }
         }
@@ -119,8 +119,8 @@ void check_indices(const std::string& path, int32_t index_limit, const std::vect
         ++line;
     }
 
-    if (line - 1 != num_ranges) {
-        throw std::runtime_error("number of lines in '" + path + "' is less than that expected from its '*.ranges.gz' file (line " + std::to_string(line) + ")");
+    if (line != num_ranges) {
+        throw std::runtime_error("number of lines in '" + path + "' is less than that expected from its '*.ranges.gz' file (line " + std::to_string(line + 1) + ")");
     }
 }
 
