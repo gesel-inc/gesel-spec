@@ -1,5 +1,5 @@
-#ifndef GESEL_CHECK_INDICES_HPP
-#define GESEL_CHECK_INDICES_HPP
+#ifndef GESEL_CHECK_SET_DETAILS_HPP
+#define GESEL_CHECK_SET_DETAILS_HPP
 
 #include <string>
 #include <cstdint>

@@ -8,6 +8,8 @@ project(gesel
 add_library(gesel INTERFACE)
 add_library(gesel::gesel ALIAS gesel)
 
+target_compile_features(gesel INTERFACE cxx_std_17)
+
 include(GNUInstallDirs)
 target_include_directories(gesel INTERFACE 
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
