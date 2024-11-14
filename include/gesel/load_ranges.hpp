@@ -14,17 +14,17 @@
 namespace gesel {
 
 namespace internal {
-inline std::vector<int32_t> load_ranges(const std::string& path) {
+inline std::vector<uint64_t> load_ranges(const std::string& path) {
     byteme::GzipFileReader reader(path);
     byteme::PerByte pb(&reader);
-    std::vector<int32_t> output;
+    std::vector<uint64_t> output;
 
     bool valid = pb.valid();
-    int32_t line = 0;
-    constexpr int32_t max_line = std::numeric_limits<int32_t>::max();
+    uint64_t line = 0;
+    constexpr uint64_t max_line = std::numeric_limits<uint64_t>::max();
 
     while (valid) {
-        int32_t number = parse_integer_field<FieldType::LAST>(pb, valid, path, line);
+        uint64_t number = parse_integer_field<FieldType::LAST>(pb, valid, path, line);
         output.push_back(number);
 
         if (line == max_line) {
@@ -36,18 +36,18 @@ inline std::vector<int32_t> load_ranges(const std::string& path) {
     return output;
 }
 
-inline std::pair<std::vector<int32_t>, std::vector<int32_t> > load_ranges_with_sizes(const std::string& path) {
+inline std::pair<std::vector<uint64_t>, std::vector<uint64_t> > load_ranges_with_sizes(const std::string& path) {
     byteme::GzipFileReader reader(path);
     byteme::PerByte pb(&reader);
-    std::vector<int32_t> output_byte, output_size;
+    std::vector<uint64_t> output_byte, output_size;
 
     bool valid = pb.valid();
-    int32_t line = 0;
-    constexpr int32_t max_line = std::numeric_limits<int32_t>::max();
+    uint64_t line = 0;
+    constexpr uint64_t max_line = std::numeric_limits<uint64_t>::max();
 
     while (valid) {
-        int32_t byte_size = parse_integer_field<FieldType::MIDDLE>(pb, valid, path, line);
-        int32_t other_size = parse_integer_field<FieldType::LAST>(pb, valid, path, line);
+        uint64_t byte_size = parse_integer_field<FieldType::MIDDLE>(pb, valid, path, line);
+        uint64_t other_size = parse_integer_field<FieldType::LAST>(pb, valid, path, line);
 
         if (line == max_line) {
             throw std::runtime_error("number of lines should fit in a 32-bit integer"); 
@@ -61,19 +61,19 @@ inline std::pair<std::vector<int32_t>, std::vector<int32_t> > load_ranges_with_s
     return std::make_pair(std::move(output_byte), std::move(output_size));
 }
 
-inline std::pair<std::vector<std::string>, std::vector<int32_t> > load_named_ranges(const std::string& path) {
+inline std::pair<std::vector<std::string>, std::vector<uint64_t> > load_named_ranges(const std::string& path) {
     byteme::GzipFileReader reader(path);
     byteme::PerByte pb(&reader);
     std::vector<std::string> output_name;
-    std::vector<int32_t> output_byte;
+    std::vector<uint64_t> output_byte;
 
     bool valid = pb.valid();
-    int32_t line = 0;
-    constexpr int32_t max_line = std::numeric_limits<int32_t>::max();
+    uint64_t line = 0;
+    constexpr uint64_t max_line = std::numeric_limits<uint64_t>::max();
 
     while (valid) {
         auto name = parse_string_field<FieldType::MIDDLE>(pb, valid, path, line);
-        int32_t byte_size = parse_integer_field<FieldType::LAST>(pb, valid, path, line);
+        uint64_t byte_size = parse_integer_field<FieldType::LAST>(pb, valid, path, line);
 
         if (line == max_line) {
             throw std::runtime_error("number of lines should fit in a 32-bit integer"); 

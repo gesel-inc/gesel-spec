@@ -17,7 +17,7 @@ TEST(CheckIndices, Success) {
         gwriter.write(payload);
     }
 
-    std::vector<int32_t> ranges{ 8, 1, 12, 0, 6 };
+    std::vector<uint64_t> ranges{ 8, 1, 12, 0, 6 };
     gesel::internal::check_indices<false>(path, 2000, ranges);
     gesel::internal::check_indices<true>(path, 2000, ranges);
 }
@@ -30,56 +30,56 @@ TEST(CheckIndices, RawFailure) {
         byteme::RawFileWriter rwriter(path);
         rwriter.write("0\ta\tb\n");
     }
-    expect_error([&]() { gesel::internal::check_indices<false>(path, 10, std::vector<int32_t>{ 2 }); }, "non-digit");
+    expect_error([&]() { gesel::internal::check_indices<false>(path, 10, std::vector<uint64_t>{ 2 }); }, "non-digit");
 
     {
         byteme::RawFileWriter rwriter(path);
         rwriter.write("0\t\t\n");
     }
-    expect_error([&]() { gesel::internal::check_indices<false>(path, 10, std::vector<int32_t>{ 2 }); }, "empty field");
+    expect_error([&]() { gesel::internal::check_indices<false>(path, 10, std::vector<uint64_t>{ 2 }); }, "empty field");
 
     {
         byteme::RawFileWriter rwriter(path);
         rwriter.write("0\n4");
     }
-    expect_error([&]() { gesel::internal::check_indices<false>(path, 10, std::vector<int32_t>{ 1, 1 }); }, "terminating newline");
+    expect_error([&]() { gesel::internal::check_indices<false>(path, 10, std::vector<uint64_t>{ 1, 1 }); }, "terminating newline");
 
     // Alright, moving onto some more interesting failures.
     {
         byteme::RawFileWriter rwriter(path);
         rwriter.write("12\n");
     }
-    expect_error([&]() { gesel::internal::check_indices<false>(path, 10, std::vector<int32_t>{ 3 }); }, "out-of-range");
+    expect_error([&]() { gesel::internal::check_indices<false>(path, 10, std::vector<uint64_t>{ 3 }); }, "out-of-range");
 
     {
         byteme::RawFileWriter rwriter(path);
         rwriter.write("3\t0\t5\n");
     }
-    expect_error([&]() { gesel::internal::check_indices<false>(path, 10, std::vector<int32_t>{ 5 }); }, "duplicate index");
+    expect_error([&]() { gesel::internal::check_indices<false>(path, 10, std::vector<uint64_t>{ 5 }); }, "duplicate index");
 
     {
         byteme::RawFileWriter rwriter(path);
         rwriter.write("3\t4\t5\n");
     }
-    expect_error([&]() { gesel::internal::check_indices<false>(path, 10, std::vector<int32_t>{ 5 }); }, "out-of-range");
+    expect_error([&]() { gesel::internal::check_indices<false>(path, 10, std::vector<uint64_t>{ 5 }); }, "out-of-range");
 
     {
         byteme::RawFileWriter rwriter(path);
         rwriter.write("3\t4\t2\n1\t4\n");
     }
-    expect_error([&]() { gesel::internal::check_indices<false>(path, 10, std::vector<int32_t>{ 5 }); }, "number of lines");
+    expect_error([&]() { gesel::internal::check_indices<false>(path, 10, std::vector<uint64_t>{ 5 }); }, "number of lines");
 
     {
         byteme::RawFileWriter rwriter(path);
         rwriter.write("3\t4\t2\n1\t4\n");
     }
-    expect_error([&]() { gesel::internal::check_indices<false>(path, 10, std::vector<int32_t>{ 5, 4 }); }, "number of bytes per line");
+    expect_error([&]() { gesel::internal::check_indices<false>(path, 10, std::vector<uint64_t>{ 5, 4 }); }, "number of bytes per line");
 
     {
         byteme::RawFileWriter rwriter(path);
         rwriter.write("3\t4\t2\n1\t4\n");
     }
-    expect_error([&]() { gesel::internal::check_indices<false>(path, 10, std::vector<int32_t>{ 5, 3, 1 }); }, "number of lines");
+    expect_error([&]() { gesel::internal::check_indices<false>(path, 10, std::vector<uint64_t>{ 5, 3, 1 }); }, "number of lines");
 }
 
 TEST(CheckIndices, GzipFailure) {
@@ -91,7 +91,7 @@ TEST(CheckIndices, GzipFailure) {
         byteme::GzipFileWriter gwriter(path + ".gz");
         gwriter.write("0\n2\n");
     }
-    expect_error([&]() { gesel::internal::check_indices<true>(path, 10, std::vector<int32_t>{ 1, 1, 1 }); }, "early termination");
+    expect_error([&]() { gesel::internal::check_indices<true>(path, 10, std::vector<uint64_t>{ 1, 1, 1 }); }, "early termination");
 
     {
         byteme::RawFileWriter rwriter(path);
@@ -99,7 +99,7 @@ TEST(CheckIndices, GzipFailure) {
         byteme::GzipFileWriter gwriter(path + ".gz");
         gwriter.write("0\n2\t3\n3\n");
     }
-    expect_error([&]() { gesel::internal::check_indices<true>(path, 10, std::vector<int32_t>{ 1, 1, 1 }); }, "different indices");
+    expect_error([&]() { gesel::internal::check_indices<true>(path, 10, std::vector<uint64_t>{ 1, 1, 1 }); }, "different indices");
 
     {
         byteme::RawFileWriter rwriter(path);
@@ -107,5 +107,5 @@ TEST(CheckIndices, GzipFailure) {
         byteme::GzipFileWriter gwriter(path + ".gz");
         gwriter.write("0\n2\t3\n3\n");
     }
-    expect_error([&]() { gesel::internal::check_indices<true>(path, 10, std::vector<int32_t>{ 1, 3, 1 }); }, "different indices");
+    expect_error([&]() { gesel::internal::check_indices<true>(path, 10, std::vector<uint64_t>{ 1, 3, 1 }); }, "different indices");
 }

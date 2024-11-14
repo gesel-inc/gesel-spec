@@ -16,7 +16,7 @@ TEST(LoadRanges, Success) {
         }
 
         auto output = gesel::internal::load_ranges(path);
-        std::vector<int32_t> expected{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        std::vector<uint64_t> expected{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
         EXPECT_EQ(output, expected);
     }
 
@@ -27,7 +27,7 @@ TEST(LoadRanges, Success) {
         }
 
         auto output = gesel::internal::load_ranges(path);
-        std::vector<int32_t> expected{ 123, 456, 789, 0 };
+        std::vector<uint64_t> expected{ 123, 456, 789, 0 };
         EXPECT_EQ(output, expected);
     }
 }
@@ -67,7 +67,7 @@ TEST(LoadRanges, Failure) {
 
     {
         byteme::GzipFileWriter writer(path);
-        writer.write("0\n1\n2147483648\n3\n4\n5\n6\n7\n8\n9\n");
+        writer.write("0\n1\n18446744073709551616\n3\n4\n5\n6\n7\n8\n9\n");
     }
     expect_error([&]() { gesel::internal::load_ranges(path); }, "overflow");
 }
@@ -81,9 +81,9 @@ TEST(LoadRangesWithSizes, Success) {
     }
 
     auto output = gesel::internal::load_ranges_with_sizes(path);
-    std::vector<int32_t> expected_bytes { 0, 12, 234, 34, 4 };
+    std::vector<uint64_t> expected_bytes { 0, 12, 234, 34, 4 };
     EXPECT_EQ(output.first, expected_bytes);
-    std::vector<int32_t> expected_sizes { 0, 23, 5, 456, 56789 };
+    std::vector<uint64_t> expected_sizes { 0, 23, 5, 456, 56789 };
     EXPECT_EQ(output.second, expected_sizes);
 }
 
@@ -122,7 +122,7 @@ TEST(LoadNamedRanges, Success) {
     auto output = gesel::internal::load_named_ranges(path);
     std::vector<std::string> expected_names { "alpha", "bravo", "charlie delta", "echo0foxtrot0", "golf_hotel" };
     EXPECT_EQ(output.first, expected_names);
-    std::vector<int32_t> expected_bytes { 1, 23, 5, 456, 56789 };
+    std::vector<uint64_t> expected_bytes { 1, 23, 5, 456, 56789 };
     EXPECT_EQ(output.second, expected_bytes);
 }
 

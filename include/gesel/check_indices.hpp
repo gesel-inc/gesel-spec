@@ -14,7 +14,7 @@ namespace gesel {
 namespace internal {
 
 template<bool has_gzip_>
-void check_indices(const std::string& path, int32_t index_limit, const std::vector<int32_t>& ranges) {
+void check_indices(const std::string& path, uint64_t index_limit, const std::vector<uint64_t>& ranges) {
     byteme::RawFileReader raw_r(path);
     auto gzpath = path + ".gz";
     auto gzip_r = [&]{
@@ -43,10 +43,10 @@ void check_indices(const std::string& path, int32_t index_limit, const std::vect
         }
     }();
 
-    std::vector<int32_t> raw_indices;
-    typename std::conditional<has_gzip_, std::vector<int32_t>, bool>::type gzip_indices;
-    int32_t line = 0;
-    const int32_t num_ranges = ranges.size();
+    std::vector<uint64_t> raw_indices;
+    typename std::conditional<has_gzip_, std::vector<uint64_t>, bool>::type gzip_indices;
+    uint64_t line = 0;
+    const uint64_t num_ranges = ranges.size();
 
     while (raw_valid) {
         raw_indices.clear();
@@ -61,7 +61,7 @@ void check_indices(const std::string& path, int32_t index_limit, const std::vect
                 }
             } while (true);
 
-            int32_t cumulative = raw_indices.front();
+            uint64_t cumulative = raw_indices.front();
             if (cumulative >= index_limit) {
                 throw std::runtime_error("out-of-range index in '" + path + "' (line " + std::to_string(line + 1) + ")");
             }

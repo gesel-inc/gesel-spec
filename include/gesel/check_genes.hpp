@@ -17,14 +17,14 @@ namespace gesel {
 
 namespace internal {
 
-inline int32_t check_genes(const std::string& path) {
+inline uint64_t check_genes(const std::string& path) {
     byteme::GzipFileReader reader(path);
     byteme::PerByte pb(&reader);
-    std::vector<int32_t> output;
+    std::vector<uint64_t> output;
 
     bool valid = pb.valid();
-    int32_t line = 0;
-    constexpr int32_t max_line = std::numeric_limits<int32_t>::max();
+    uint64_t line = 0;
+    constexpr uint64_t max_line = std::numeric_limits<uint64_t>::max();
     std::unordered_set<std::string> current_names;
 
     while (valid) {
