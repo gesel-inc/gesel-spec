@@ -76,15 +76,15 @@ TEST(LoadRangesWithSizes, Success) {
     auto path = byteme::temp_file_path("load_ranges_with_sizes");
 
     {
-        {
-            byteme::GzipFileWriter writer(path);
-            writer.write("0\t0\n12\t23\n234\t5\n34\t456\n4\t56789\n");
-        }
-
-        auto output = gesel::internal::load_ranges_with_sizes(path);
-        std::vector<std::pair<int32_t, int32_t> > expected{ { 0, 0 }, { 12, 23 }, { 234, 5 }, { 34, 456 }, { 4, 56789 } };
-        EXPECT_EQ(output, expected);
+        byteme::GzipFileWriter writer(path);
+        writer.write("0\t0\n12\t23\n234\t5\n34\t456\n4\t56789\n");
     }
+
+    auto output = gesel::internal::load_ranges_with_sizes(path);
+    std::vector<int32_t> expected_bytes { 0, 12, 234, 34, 4 };
+    EXPECT_EQ(output.first, expected_bytes);
+    std::vector<int32_t> expected_sizes { 0, 23, 5, 456, 56789 };
+    EXPECT_EQ(output.second, expected_sizes);
 }
 
 TEST(LoadRangesWithSizes, Failure) {
@@ -115,21 +115,15 @@ TEST(LoadNamedRanges, Success) {
     auto path = byteme::temp_file_path("load_named_ranges");
 
     {
-        {
-            byteme::GzipFileWriter writer(path);
-            writer.write("alpha\t1\nbravo\t23\ncharlie delta\t5\necho0foxtrot0\t456\ngolf_hotel\t56789\n");
-        }
-
-        auto output = gesel::internal::load_named_ranges(path);
-        std::vector<std::pair<std::string, int32_t> > expected{ 
-            { "alpha", 1 },
-            { "bravo", 23 },
-            { "charlie delta", 5 },
-            { "echo0foxtrot0", 456 },
-            { "golf_hotel", 56789 } 
-        };
-        EXPECT_EQ(output, expected);
+        byteme::GzipFileWriter writer(path);
+        writer.write("alpha\t1\nbravo\t23\ncharlie delta\t5\necho0foxtrot0\t456\ngolf_hotel\t56789\n");
     }
+
+    auto output = gesel::internal::load_named_ranges(path);
+    std::vector<std::string> expected_names { "alpha", "bravo", "charlie delta", "echo0foxtrot0", "golf_hotel" };
+    EXPECT_EQ(output.first, expected_names);
+    std::vector<int32_t> expected_bytes { 1, 23, 5, 456, 56789 };
+    EXPECT_EQ(output.second, expected_bytes);
 }
 
 TEST(LoadNamedRanges, Failure) {
