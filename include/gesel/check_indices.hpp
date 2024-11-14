@@ -13,8 +13,8 @@ namespace gesel {
 
 namespace internal {
 
-template<bool has_gzip_>
-void check_indices(const std::string& path, uint64_t index_limit, const std::vector<uint64_t>& ranges) {
+template<bool has_gzip_, class Extra_>
+void check_indices(const std::string& path, uint64_t index_limit, const std::vector<uint64_t>& ranges, Extra_ extra) {
     byteme::RawFileReader raw_r(path);
     auto gzpath = path + ".gz";
     auto gzip_r = [&]{
@@ -116,12 +116,19 @@ void check_indices(const std::string& path, uint64_t index_limit, const std::vec
             }
         }
 
+        extra(line, raw_indices);
+
         ++line;
     }
 
     if (line != num_ranges) {
         throw std::runtime_error("number of lines in '" + path + "' is less than that expected from its '*.ranges.gz' file (line " + std::to_string(line + 1) + ")");
     }
+}
+
+template<bool has_gzip_>
+void check_indices(const std::string& path, uint64_t index_limit, const std::vector<uint64_t>& ranges) {
+    check_indices(path, index_limit, ranges, [&](uint64_t, const std::vector<uint64_t>&) {});
 }
 
 }
