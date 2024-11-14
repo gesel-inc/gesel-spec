@@ -21,6 +21,7 @@ add_executable(
     src/check_indices.cpp
     src/check_set_details.cpp
     src/check_collection_details.cpp
+    src/check_genes.cpp
 )
 
 target_link_libraries(

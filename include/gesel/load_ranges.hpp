@@ -2,6 +2,7 @@
 #define GESEL_LOAD_RANGES_HPP
 
 #include <cstdint>
+#include <limits>
 #include <stdexcept>
 #include <vector>
 #include <string>

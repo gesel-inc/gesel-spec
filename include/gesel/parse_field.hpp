@@ -2,6 +2,7 @@
 #define GESEL_PARSE_INTEGER_FIELD_HPP
 
 #include <type_traits>
+#include <limits>
 #include <cstdint>
 #include <string>
 #include <stdexcept>
