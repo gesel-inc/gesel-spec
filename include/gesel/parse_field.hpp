@@ -59,6 +59,8 @@ parse_integer_field(ByteSource_& pb, bool& valid, const std::string& path, int32
     if (number == 0) {
         if (ndigits > 1) {
             throw std::runtime_error("leading zero detected in '" + path + "' (line " + std::to_string(line) + ")");
+        } else if (ndigits == 0) {
+            throw std::runtime_error("empty field detected in '" + path + "' (line " + std::to_string(line) + ")");
         }
     } else if (has_leading_zero) {
         throw std::runtime_error("leading zero detected in '" + path + "' (line " + std::to_string(line) + ")");
