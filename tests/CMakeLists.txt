@@ -19,6 +19,7 @@ add_executable(
     libtest 
     src/load_ranges.cpp
     src/check_indices.cpp
+    src/check_set_details.cpp
 )
 
 target_link_libraries(
