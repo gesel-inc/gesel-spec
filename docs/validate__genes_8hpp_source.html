@@ -95,55 +95,60 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacegesel.html">gesel</a> {</div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
-<div class="foldopen" id="foldopen00029" data-start="{" data-end="}">
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="namespacegesel.html#a23c9159c734be4f259cee012f5dc0007">   29</a></span><span class="keyword">inline</span> uint64_t <a class="code hl_function" href="namespacegesel.html#a23c9159c734be4f259cee012f5dc0007">validate_genes</a>(<span class="keyword">const</span> std::string&amp; prefix, <span class="keyword">const</span> std::vector&lt;std::string&gt;&amp; types) {</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    <span class="keywordtype">bool</span> first = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    uint64_t num_genes = 0;</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span> t : types) {</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        <span class="keyword">auto</span> candidate = internal::check_genes(prefix + t + <span class="stringliteral">&quot;.tsv.gz&quot;</span>);</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>        <span class="keywordflow">if</span> (first) {</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>            num_genes = candidate;</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>            first = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (candidate != num_genes) {</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>            <span class="keywordflow">throw</span> std::runtime_error(<span class="stringliteral">&quot;inconsistent number of genes between types (&quot;</span> + std::to_string(num_genes) + <span class="stringliteral">&quot; for &quot;</span> + types.front() + <span class="stringliteral">&quot;, &quot;</span> + std::to_string(candidate) + <span class="stringliteral">&quot; for &quot;</span> + t + <span class="stringliteral">&quot;)&quot;</span>);</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>        }</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    }</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="keywordflow">return</span> num_genes;</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>}</div>
+<div class="foldopen" id="foldopen00030" data-start="{" data-end="}">
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="namespacegesel.html#a23c9159c734be4f259cee012f5dc0007">   30</a></span><span class="keyword">inline</span> uint64_t <a class="code hl_function" href="namespacegesel.html#a23c9159c734be4f259cee012f5dc0007">validate_genes</a>(<span class="keyword">const</span> std::string&amp; prefix, <span class="keyword">const</span> std::vector&lt;std::string&gt;&amp; types) {</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    <span class="keywordtype">bool</span> first = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    uint64_t num_genes = 0;</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span> t : types) {</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>        <span class="keyword">auto</span> candidate = internal::check_genes(prefix + t + <span class="stringliteral">&quot;.tsv.gz&quot;</span>);</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>        <span class="keywordflow">if</span> (first) {</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>            num_genes = candidate;</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>            first = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (candidate != num_genes) {</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>            <span class="keywordflow">throw</span> std::runtime_error(<span class="stringliteral">&quot;inconsistent number of genes between types (&quot;</span> + std::to_string(num_genes) + <span class="stringliteral">&quot; for &quot;</span> + types.front() + <span class="stringliteral">&quot;, &quot;</span> + std::to_string(candidate) + <span class="stringliteral">&quot; for &quot;</span> + t + <span class="stringliteral">&quot;)&quot;</span>);</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>        }</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    }</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <span class="keywordflow">if</span> (first) {</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>        <span class="keywordflow">throw</span> std::runtime_error(<span class="stringliteral">&quot;at least one gene name type should be present&quot;</span>);</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    }</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <span class="keywordflow">return</span> num_genes;</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>}</div>
 </div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
-<div class="foldopen" id="foldopen00053" data-start="{" data-end="}">
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="namespacegesel.html#a10dc0ad0de78ad2843ffcb5465cb5ec1">   53</a></span><span class="keyword">inline</span> uint64_t <a class="code hl_function" href="namespacegesel.html#a23c9159c734be4f259cee012f5dc0007">validate_genes</a>(<span class="keyword">const</span> std::string&amp; prefix) {</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    std::vector&lt;std::string&gt; types;</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    std::filesystem::path path(prefix);</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="keyword">auto</span> dir = path.parent_path();</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keyword">auto</span> raw_prefix = path.filename().string();</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; entry : std::filesystem::directory_iterator(dir)) {</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>        std::string name = entry.path().filename().string();</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>        <span class="keywordflow">if</span> (name.rfind(raw_prefix, 0) != 0) {</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>            <span class="keywordflow">continue</span>;</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>        }</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        <span class="keywordflow">if</span> (name.size() &lt; 6) {</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>            <span class="keywordflow">continue</span>;</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        }</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        <span class="keywordtype">size_t</span> ext_loc = name.size() - 7;</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        <span class="keywordflow">if</span> (name.rfind(<span class="stringliteral">&quot;.tsv.gz&quot;</span>, ext_loc) != ext_loc) {</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>            <span class="keywordflow">continue</span>;</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>        }</div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        types.push_back(name.substr(raw_prefix.size(), ext_loc - raw_prefix.size()));</div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    }</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="namespacegesel.html#a23c9159c734be4f259cee012f5dc0007">validate_genes</a>(prefix, types);</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>}</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
+<div class="foldopen" id="foldopen00059" data-start="{" data-end="}">
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="namespacegesel.html#a10dc0ad0de78ad2843ffcb5465cb5ec1">   59</a></span><span class="keyword">inline</span> uint64_t <a class="code hl_function" href="namespacegesel.html#a23c9159c734be4f259cee012f5dc0007">validate_genes</a>(<span class="keyword">const</span> std::string&amp; prefix) {</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    std::vector&lt;std::string&gt; types;</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    std::filesystem::path path(prefix);</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    <span class="keyword">auto</span> dir = path.parent_path();</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <span class="keyword">auto</span> raw_prefix = path.filename().string();</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; entry : std::filesystem::directory_iterator(dir)) {</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        std::string name = entry.path().filename().string();</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        <span class="keywordflow">if</span> (name.rfind(raw_prefix, 0) != 0) {</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>            <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        }</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>        <span class="keywordflow">if</span> (name.size() &lt; 6) {</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>            <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>        }</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        <span class="keywordtype">size_t</span> ext_loc = name.size() - 7;</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>        <span class="keywordflow">if</span> (name.rfind(<span class="stringliteral">&quot;.tsv.gz&quot;</span>, ext_loc) != ext_loc) {</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>            <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        }</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        types.push_back(name.substr(raw_prefix.size(), ext_loc - raw_prefix.size()));</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    }</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="namespacegesel.html#a23c9159c734be4f259cee012f5dc0007">validate_genes</a>(prefix, types);</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>}</div>
 </div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>}</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>}</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="anamespacegesel_html"><div class="ttname"><a href="namespacegesel.html">gesel</a></div><div class="ttdoc">Validate Gesel database and gene files.</div><div class="ttdef"><b>Definition</b> validate_database.hpp:20</div></div>
-<div class="ttc" id="anamespacegesel_html_a23c9159c734be4f259cee012f5dc0007"><div class="ttname"><a href="namespacegesel.html#a23c9159c734be4f259cee012f5dc0007">gesel::validate_genes</a></div><div class="ttdeci">uint64_t validate_genes(const std::string &amp;prefix, const std::vector&lt; std::string &gt; &amp;types)</div><div class="ttdef"><b>Definition</b> validate_genes.hpp:29</div></div>
+<div class="ttc" id="anamespacegesel_html_a23c9159c734be4f259cee012f5dc0007"><div class="ttname"><a href="namespacegesel.html#a23c9159c734be4f259cee012f5dc0007">gesel::validate_genes</a></div><div class="ttdeci">uint64_t validate_genes(const std::string &amp;prefix, const std::vector&lt; std::string &gt; &amp;types)</div><div class="ttdef"><b>Definition</b> validate_genes.hpp:30</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

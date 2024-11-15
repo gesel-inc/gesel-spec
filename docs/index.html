@@ -89,7 +89,7 @@ General rules</h1>
 Expected files</h1>
 <h2><a class="anchor" id="autotoc_md4"></a>
 Gene mapping</h2>
-<p>Each gene can be associated with one, zero or multiple names of different types (e.g., Ensembl identifiers, symbols). For each type of gene name, we expect a file named <code>&lt;TYPE&gt;.tsv.gz</code>. This is a Gzip-compressed tab-separated file where each line corresponds to a gene and the tab-separated fields are the names for that gene. Different genes may have different number of fields, and an empty line indicates that the equivalence class contains no names of that type.</p>
+<p>Each gene can be associated with one, zero or multiple names of different types (e.g., Ensembl identifiers, symbols). For each type of gene name, we expect a "gene mapping" file named <code>&lt;TYPE&gt;.tsv.gz</code>. This is a Gzip-compressed tab-separated file where each line corresponds to a gene and the tab-separated fields are the names for that gene. Different genes may have different number of fields, and an empty line indicates that the equivalence class contains no names of that type.</p>
 <p>Any type of gene name can be used, but most Gesel clients will expect one or more of the following files:</p>
 <ul>
 <li><code>ensembl.tsv.gz</code>, where the fields are Ensembl identifiers associated with that gene.</li>
@@ -97,6 +97,7 @@ Gene mapping</h2>
 <li><code>symbol.tsv.gz</code>, where the fields are symbols associated with that gene.</li>
 </ul>
 <p>All files have the same number of lines as they represent different names of the same genes. Each gene's identity (i.e., the "gene index") is defined as the 0-based index of the corresponding line in each file.</p>
+<p>At least one gene mapping file should be present for each species.</p>
 <h2><a class="anchor" id="autotoc_md5"></a>
 Collection details</h2>
 <p><code>collections.tsv.gz</code> is a Gzip-compressed tab-separated file where each line corresponds to a gene set collection and contains the following fields:</p>
@@ -163,8 +164,8 @@ Quick start</h2>
 <div class="line"><span class="keyword">auto</span> num_genes = <a class="code hl_function" href="namespacegesel.html#a23c9159c734be4f259cee012f5dc0007">gesel::validate_genes</a>(<span class="stringliteral">&quot;my/path/to/genes/9606_&quot;</span>);</div>
 <div class="line"><a class="code hl_function" href="namespacegesel.html#abc7c78eb8c53bfe0fb7689cf3d13fa0f">gesel::validate_database</a>(<span class="stringliteral">&quot;my/path/to/db/9606_&quot;</span>, num_genes);</div>
 <div class="ttc" id="agesel_8hpp_html"><div class="ttname"><a href="gesel_8hpp.html">gesel.hpp</a></div><div class="ttdoc">Validate Gesel database and gene files.</div></div>
-<div class="ttc" id="anamespacegesel_html_a23c9159c734be4f259cee012f5dc0007"><div class="ttname"><a href="namespacegesel.html#a23c9159c734be4f259cee012f5dc0007">gesel::validate_genes</a></div><div class="ttdeci">uint64_t validate_genes(const std::string &amp;prefix, const std::vector&lt; std::string &gt; &amp;types)</div><div class="ttdef"><b>Definition</b> validate_genes.hpp:29</div></div>
-<div class="ttc" id="anamespacegesel_html_abc7c78eb8c53bfe0fb7689cf3d13fa0f"><div class="ttname"><a href="namespacegesel.html#abc7c78eb8c53bfe0fb7689cf3d13fa0f">gesel::validate_database</a></div><div class="ttdeci">void validate_database(const std::string &amp;prefix, uint64_t num_genes)</div><div class="ttdef"><b>Definition</b> validate_database.hpp:80</div></div>
+<div class="ttc" id="anamespacegesel_html_a23c9159c734be4f259cee012f5dc0007"><div class="ttname"><a href="namespacegesel.html#a23c9159c734be4f259cee012f5dc0007">gesel::validate_genes</a></div><div class="ttdeci">uint64_t validate_genes(const std::string &amp;prefix, const std::vector&lt; std::string &gt; &amp;types)</div><div class="ttdef"><b>Definition</b> validate_genes.hpp:30</div></div>
+<div class="ttc" id="anamespacegesel_html_abc7c78eb8c53bfe0fb7689cf3d13fa0f"><div class="ttname"><a href="namespacegesel.html#abc7c78eb8c53bfe0fb7689cf3d13fa0f">gesel::validate_database</a></div><div class="ttdeci">void validate_database(const std::string &amp;prefix, uint64_t num_genes)</div><div class="ttdef"><b>Definition</b> validate_database.hpp:84</div></div>
 </div><!-- fragment --><p>This takes the path prefix to a species-specific suite of Gesel files and validates their contents, throwing an error if any invalid formatting is detected. Note that the gene mapping files can be stored in a different directory from the other files.</p>
 <p>Check out the <a href="https://gesel-inc.github.io/gesel-spec">reference documentation</a> for more information.</p>
 <h2><a class="anchor" id="autotoc_md11"></a>
