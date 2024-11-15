@@ -9,6 +9,7 @@
 
 #include "byteme/byteme.hpp"
 
+#include "utils.hpp"
 #include "parse_field.hpp"
 
 namespace gesel {
@@ -76,30 +77,22 @@ inline std::pair<std::vector<uint64_t>, std::vector<uint64_t> > load_ranges_with
     return std::make_pair(std::move(output_byte), std::move(output_size));
 }
 
-inline std::vector<uint64_t> load_named_ranges(const std::string& path) {
+inline std::pair<std::vector<std::string>, std::vector<uint64_t> > load_named_ranges(const std::string& path) {
     byteme::GzipFileReader reader(path);
     byteme::PerByte pb(&reader);
+    std::vector<std::string> output_name; 
     std::vector<uint64_t> output_byte;
 
     bool valid = pb.valid();
     uint64_t line = 0;
-    std::string last; 
     constexpr uint64_t max_line = std::numeric_limits<uint64_t>::max();
 
     while (valid) {
         auto name = parse_string_field<FieldType::MIDDLE>(pb, valid, path, line);
+        output_name.push_back(std::move(name));
+
         uint64_t byte_size = parse_integer_field<FieldType::LAST>(pb, valid, path, line);
         output_byte.push_back(byte_size);
-
-        for (auto x : name) {
-            if ((x < 'a' || x > 'z') && (x < '0' || x > '9') && (x != '-')) {
-                throw std::runtime_error("tokens should only contain lower-case alphabetical characters, digits or a dash in '" + path + "' " + append_line_number(line));
-            }
-        }
-        if (line && name <= last) {
-            throw std::runtime_error("tokens should be unique and lexicographically sorted in '" + path + "' " + append_line_number(line));
-        } 
-        last.swap(name);
 
         if (line == max_line) {
             throw std::runtime_error("number of lines should fit in a 32-bit integer in '" + path + "'"); 
@@ -108,7 +101,7 @@ inline std::vector<uint64_t> load_named_ranges(const std::string& path) {
     }
 
     check_bytes(output_byte);
-    return output_byte;
+    return std::make_pair(std::move(output_name), std::move(output_byte));
 }
 
 }

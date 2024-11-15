@@ -13,7 +13,8 @@ namespace gesel {
 
 namespace internal {
 
-inline void check_set_details(const std::string& path, const std::vector<uint64_t>& ranges, const std::vector<uint64_t>& sizes) {
+template<class Extra_>
+void check_set_details(const std::string& path, const std::vector<uint64_t>& ranges, const std::vector<uint64_t>& sizes, Extra_ extra) {
     byteme::RawFileReader raw_r(path);
     auto gzpath = path + ".gz";
     byteme::GzipFileReader gzip_r(gzpath);
@@ -57,12 +58,17 @@ inline void check_set_details(const std::string& path, const std::vector<uint64_
             throw std::runtime_error("different size in '" + path + ".gz' compared to its '*.ranges.gz' file " + append_line_number(line));
         }
 
+        extra(line, name, description);
         ++line;
     }
 
     if (line != num_ranges) {
         throw std::runtime_error("number of lines in '" + path + "' is less than that expected from its '*.ranges.gz' file " + append_line_number(line));
     }
+}
+
+inline void check_set_details(const std::string& path, const std::vector<uint64_t>& ranges, const std::vector<uint64_t>& sizes) {
+    check_set_details(path, ranges, sizes, [&](uint64_t, const std::string&, const std::string&) {});
 }
 
 }

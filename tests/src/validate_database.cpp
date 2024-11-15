@@ -6,7 +6,7 @@
 #include <filesystem>
 
 #include "byteme/temp_file_path.hpp"
-#include "gesel/gesel.hpp"
+#include "gesel/validate_database.hpp"
 #include "utils.h"
 
 class TestValidateDatabase : public ::testing::Test {
