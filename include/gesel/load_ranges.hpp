@@ -14,6 +14,19 @@
 namespace gesel {
 
 namespace internal {
+
+inline void check_bytes(const std::vector<uint64_t>& bytes) {
+    uint64_t cumulative = 0;
+    constexpr uint64_t max_value = std::numeric_limits<uint64_t>::max();
+    for (auto by : bytes) {
+        if (by >= max_value - cumulative) {
+            throw std::runtime_error("cumulative sum of bytes should fit in a 64-bit integer"); 
+        }
+        cumulative += by;
+        ++cumulative;
+    }
+}
+
 inline std::vector<uint64_t> load_ranges(const std::string& path) {
     byteme::GzipFileReader reader(path);
     byteme::PerByte pb(&reader);
@@ -28,11 +41,12 @@ inline std::vector<uint64_t> load_ranges(const std::string& path) {
         output.push_back(number);
 
         if (line == max_line) {
-            throw std::runtime_error("number of lines should fit in a 32-bit integer"); 
+            throw std::runtime_error("number of lines should fit in a 64-bit integer"); 
         }
         ++line;
     }
 
+    check_bytes(output);
     return output;
 }
 
@@ -58,6 +72,7 @@ inline std::pair<std::vector<uint64_t>, std::vector<uint64_t> > load_ranges_with
         output_size.push_back(other_size);
     }
 
+    check_bytes(output_byte);
     return std::make_pair(std::move(output_byte), std::move(output_size));
 }
 
@@ -84,6 +99,7 @@ inline std::pair<std::vector<std::string>, std::vector<uint64_t> > load_named_ra
         output_byte.push_back(byte_size);
     }
 
+    check_bytes(output_byte);
     return std::make_pair(std::move(output_name), std::move(output_byte));
 }
 

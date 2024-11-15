@@ -128,7 +128,7 @@ void check_indices(const std::string& path, uint64_t index_limit, const std::vec
 
 template<bool has_gzip_>
 void check_indices(const std::string& path, uint64_t index_limit, const std::vector<uint64_t>& ranges) {
-    check_indices(path, index_limit, ranges, [&](uint64_t, const std::vector<uint64_t>&) {});
+    check_indices<has_gzip_>(path, index_limit, ranges, [&](uint64_t, const std::vector<uint64_t>&) {});
 }
 
 }

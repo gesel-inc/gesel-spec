@@ -70,6 +70,12 @@ TEST(LoadRanges, Failure) {
         writer.write("0\n1\n18446744073709551616\n3\n4\n5\n6\n7\n8\n9\n");
     }
     expect_error([&]() { gesel::internal::load_ranges(path); }, "overflow");
+
+    {
+        byteme::GzipFileWriter writer(path);
+        writer.write("0\n1\n18446744073709551615\n3\n4\n5\n6\n7\n8\n9\n");
+    }
+    expect_error([&]() { gesel::internal::load_ranges(path); }, "cumulative");
 }
 
 TEST(LoadRangesWithSizes, Success) {
