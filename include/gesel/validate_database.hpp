@@ -21,18 +21,26 @@ namespace internal {
 
 inline void tokenize(uint64_t index, const std::string& text, std::unordered_map<std::string, std::vector<uint64_t> >& tokens_to_sets) {
     std::string latest;
+    auto add = [&]() {
+        if (latest.size()) {
+            auto& vec = tokens_to_sets[latest];
+            if (vec.empty() || vec.back() != index) {
+                vec.push_back(index);
+            }
+            latest.clear();
+        }
+    };
+
     for (auto x : text) {
         x = std::tolower(x);
         if (invalid_token_character(x)) {
-            if (latest.size()) {
-                auto& vec = tokens_to_sets[latest];
-                if (vec.empty() || vec.back() != index) {
-                    vec.push_back(index);
-                }
-                latest.clear();
-            }
+            add();
+        } else {
+            latest += x;
         }
     }
+
+    add();
 }
 
 inline void check_tokens(const std::vector<std::string>& tokens, const std::string& path) {

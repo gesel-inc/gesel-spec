@@ -116,6 +116,9 @@ void check_indices(const std::string& path, uint64_t index_limit, const std::vec
             }
         }
 
+        for (size_t i = 1, end = raw_indices.size(); i < end; ++i) {
+            raw_indices[i] += raw_indices[i - 1];
+        }
         extra(line, raw_indices);
 
         ++line;
@@ -126,6 +129,7 @@ void check_indices(const std::string& path, uint64_t index_limit, const std::vec
     }
 }
 
+// For testing only.
 template<bool has_gzip_>
 void check_indices(const std::string& path, uint64_t index_limit, const std::vector<uint64_t>& ranges) {
     check_indices<has_gzip_>(path, index_limit, ranges, [&](uint64_t, const std::vector<uint64_t>&) {});
