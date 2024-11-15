@@ -77,7 +77,7 @@ void check_indices(const std::string& path, uint64_t index_limit, const std::vec
                 cumulative += delta;
             }
         } else {
-            raw_p.advance();
+            raw_valid = raw_p.advance();
         }
 
         if (line >= num_ranges) {
@@ -102,7 +102,7 @@ void check_indices(const std::string& path, uint64_t index_limit, const std::vec
                     }
                 } while (true);
             } else {
-                gzip_p.advance();
+                gzip_valid = gzip_p.advance();
             }
 
             size_t num_indices = raw_indices.size();

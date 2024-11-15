@@ -47,6 +47,17 @@ TEST_F(TestCheckIndices, Success) {
             }
         }
     );
+
+    // Check that we correctly handle empty lines at the end.
+    payload = "0\t123\t45\n6\n780\t1\t234\t45\n67\t890\n\n";
+    {
+        byteme::RawFileWriter rwriter(path);
+        rwriter.write(payload);
+        byteme::GzipFileWriter gwriter(path + ".gz");
+        gwriter.write(payload);
+    }
+    ranges = std::vector<uint64_t>{ 8, 1, 12, 6, 0 };
+    check_indices<true>(path, 2000, ranges);
 }
 
 TEST_F(TestCheckIndices, RawFailure) {

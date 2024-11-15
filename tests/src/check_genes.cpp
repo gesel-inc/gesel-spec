@@ -21,6 +21,13 @@ TEST(CheckGenes, Success) {
         gwriter.write("alpha\nbravo\tcharlie\ndelta\techo\tfoxtrot\n\ngolf\thotel\nindia\talpha\n");
     }
     EXPECT_EQ(gesel::internal::check_genes(path), 6);
+
+    // Empty last line is okay.
+    {
+        byteme::GzipFileWriter gwriter(path);
+        gwriter.write("alpha\nbravo\tcharlie\ndelta\techo\tfoxtrot\n\ngolf\thotel\nindia\talpha\n\n");
+    }
+    EXPECT_EQ(gesel::internal::check_genes(path), 7);
 }
 
 TEST(CheckGenes, Failure) {
