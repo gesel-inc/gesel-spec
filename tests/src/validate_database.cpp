@@ -14,7 +14,7 @@
 TEST(Tokenization, Generator) {
     std::unordered_map<std::string, std::vector<uint64_t> > tokens_to_sets;
     gesel::internal::tokenize(1, "aaron is awesome", tokens_to_sets);
-    gesel::internal::tokenize(2, "Aaron and Aaron", tokens_to_sets);
+    gesel::internal::tokenize(2, "Aaron and   Aaron", tokens_to_sets); // throwing in some empty space to check that it doesn't get picked up.
     gesel::internal::tokenize(5, "12345.4567890 is aaron", tokens_to_sets);
 
     EXPECT_EQ(tokens_to_sets.size(), 6);
@@ -37,6 +37,7 @@ TEST(Tokenization, Checker) {
     expect_error([&]() { gesel::internal::check_tokens(std::vector<std::string>{ "bravo", "alpha", "charlie" }, "foobar.tsv"); }, "sorted");
     expect_error([&]() { gesel::internal::check_tokens(std::vector<std::string>{ "Alpha", "charlie" }, "foobar.tsv"); }, "alphabetical");
     expect_error([&]() { gesel::internal::check_tokens(std::vector<std::string>{ "alpha bravo", "charlie" }, "foobar.tsv"); }, "alphabetical");
+    expect_error([&]() { gesel::internal::check_tokens(std::vector<std::string>{ "" }, "foobar.tsv"); }, "empty");
 }
 
 class TestValidateDatabase : public ::testing::Test {
