@@ -1,5 +1,9 @@
 # Gesel file specification v0.1.0
 
+![Unit tests](https://github.com/gesel-inc/gesel-spec/actions/workflows/run-tests.yaml/badge.svg)
+![Documentation](https://github.com/gesel-inc/gesel-spec/actions/workflows/doxygenate.yaml/badge.svg)
+[![codecov](https://codecov.io/gh/gesel-inc/gesel-spec/graph/badge.svg?token=8J0JL45VU7)](https://codecov.io/gh/gesel-inc/gesel-spec)
+
 ## Overview
 
 The [Gesel database](https://doi.org/10.21105/joss.05777) uses client-side HTTP range requests to extract gene sets and other details.
@@ -194,22 +198,22 @@ If you're using CMake, you just need to add something like this to your `CMakeLi
 include(FetchContent)
 
 FetchContent_Declare(
-  takane 
-  GIT_REPOSITORY https://github.com/ArtifactDB/takane
+  gesel 
+  GIT_REPOSITORY https://github.com/gesel-inc/gesel
   GIT_TAG master # or any version of interest
 )
 
-FetchContent_MakeAvailable(takane)
+FetchContent_MakeAvailable(gesel)
 ```
 
-Then you can link to **takane** to make the headers available during compilation:
+Then you can link to **gesel** to make the headers available during compilation:
 
 ```cmake
 # For executables:
-target_link_libraries(myexe takane)
+target_link_libraries(myexe gesel)
 
 # For libaries
-target_link_libraries(mylib INTERFACE takane)
+target_link_libraries(mylib INTERFACE gesel)
 ```
 
 Alternatively, you can install the library by cloning a suitable version of this repository and running the following commands:
@@ -223,8 +227,8 @@ cmake --build . --target install
 Then you can use `find_package()` as usual:
 
 ```cmake
-find_package(artifactdb_takane CONFIG REQUIRED)
-target_link_libraries(mylib INTERFACE artifactdb::takane)
+find_package(gesel_gesel CONFIG REQUIRED)
+target_link_libraries(mylib INTERFACE gesel::gesel)
 ```
 
 If you're not using CMake, the simple approach is to just copy the files in the `include/` subdirectory - 
