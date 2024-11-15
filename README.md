@@ -1,32 +1,43 @@
-# gesel file specification v0.1.0
+# Gesel file specification v0.1.0
 
 ## Overview
 
 The [Gesel database](https://doi.org/10.21105/joss.05777) uses client-side HTTP range requests to extract gene sets and other details.
-This document describes the file formats used by Gesel; once created, the files can be hosted on a static file server without requiring any more logic.
+This document describes the file formats used by Gesel clients.
+Once created, the files can be hosted on a static file server without requiring any more logic.
 
-Each species contains a separate copy of the files described in this section.
+Each species contains its own separate copy of the files described in this document.
 Files from a particular species will be prefixed with that species' NCBI taxonomy ID, e.g., `9606_ensembl.tsv.gz`.
 For brevity, we will omit the prefix in the rest of this document.
 
+## General rules
+
+All files are assumed to use UTF-8 encoding.
 The contents of each file should use LF-only newlines (i.e., `\n`).
 Each file should also be newline-terminated.
 None of the free-text fields in any of the files should contain special characters like `\t` or `\n`.
+
+It is assumed that all files for a species are located in the same directory.
+The only exception is that of the gene mapping files, which should have the same species prefix but may be located in a separate directory.
+This distinction allows arbitrary gene name types to be used in the gene mapping file names without conflicting with other files in the Gesel database.
+
+When storing arrays of integers in a tab-separated file, we use delta-encoding to reduce the number of bytes used by each line.
+Given a sorted integer array, we store the first value as the first field of the line.
+All subsequent tab-separated fields contain differences from the preceding value in the array.
+The original integer array can be recovered as the cumulative sum of the delta-encoded array.
+An empty line represents a zero-length array. 
+
+All integers in this document are assumed to fit into a 64-bit unsigned integer.
+This includes the cumulative sums used to compute the byte ranges (see next) or to reverse the delta encoding.
+The number of lines in any file is also assumed to fit into a 64-bit unsigned integer. 
 
 Each `XXX.tsv.ranges.gz` file stores the number of bytes for each line of the `XXX.tsv` file, excluding the trailing newline.
 This can be used in HTTP range requests to extract a single line,
 by adding 1 to the number of bytes (for the newline) and computing the cumulative sum to identify the end position of each line.
 
-We use delta-encoding to reduce the number of bytes used by each line of tab-separated integers.
-Given a sorted integer array, we store the first value as the first field of the line.
-All subsequent tab-separated fields contain differences from the preceding value in the array.
-The original integer array can be recovered as the cumulative sum of the delta-encoded array.
+## Expected files
 
-All integers in this document are assumed to fit into a 64-bit unsigned integer.
-This includes the cumulative sums used to compute the byte ranges or to reverse the delta encoding.
-All strings are assumed to use UTF-8 encoding.
-
-## Gene mappings
+### Gene mapping
 
 Each gene can be associated with one, zero or multiple names of different types (e.g., Ensembl identifiers, symbols). 
 For each type of gene name, we expect a file named `<TYPE>.tsv.gz`.
@@ -42,7 +53,7 @@ Any type of gene name can be used, but most Gesel clients will expect one or mor
 All files have the same number of lines as they represent different names of the same genes.
 Each gene's identity (i.e., the "gene index") is defined as the 0-based index of the corresponding line in each file.
 
-## Collection details
+### Collection details
 
 `collections.tsv.gz` is a Gzip-compressed tab-separated file where each line corresponds to a gene set collection and contains the following fields:
 
@@ -75,7 +86,7 @@ This field contains the set index (see below) of the first set in each collectio
 To reduce the download size, we do not store `start` in `collections.tsv(.gz)`,
 as this can be computed easily on the client from the cumulative sum of `number`.
 
-## Set details
+### Set details
 
 `sets.tsv.gz` is a Gzip-compressed tab-separated file where each line corresponds to a gene set and contains the following fields:
 
@@ -105,7 +116,7 @@ while the `number` field contains the position of each set in its collection (e.
 To reduce the download size, we do not store `collection` and `position` in `sets.tsv.gz`,
 as these can be computed easily on the client from the `number` field in `collections.tsv.gz` or `collections.tsv.ranges.gz`.
 
-## Mappings between sets and genes
+### Mappings between sets and genes
 
 `set2gene.tsv` is a tab-separated file where each line corresponds to a gene set in `sets.tsv(.gz)`.
 Each line contains the delta-encoded gene indices for the corresponding set.
@@ -126,10 +137,10 @@ Similarly, `gene2set.tsv.gz` is a Gzip-compressed version of `gene2set.tsv`.
 Applications can either download these `*.tsv.gz` files to obtain all relationships up-front,
 or they can download `*.ranges.gz` and perform HTTP range requests on the corresponding `*.tsv` to obtain each individual relationship.
 
-## Text search tokens
+### Text search tokens
 
 To search sets based on the names and descriptions, we split the free text into tokens.
-The tokenization strategy is very simple - every contiguous stretch of ASCII alphanumeric characters or dashes (`-`) is treated as a token.
+The tokenization strategy is very simple - every contiguous stretch of ASCII alphanumeric characters or dashes (`-`) is converted to lower case and treated as a token.
 Query strings should be processed in the same manner to generate tokens for matching against `token`.
 Handling of `?` or `*` wildcards is at the discretion of the client implementation.
 
@@ -155,3 +166,67 @@ This can be used for HTTP range requests to obtain the identities of the sets th
 Similarly, `tokens-descriptions.tsv.gz` is a Gzip-compressed version of `tokens-descriptions.tsv`.
 Applications can either download these `*.tsv.gz` files to obtain all relationships up-front,
 or they can download `*.ranges.gz` and perform HTTP range requests on the corresponding `*.tsv` to obtain each individual relationship.
+
+## Validating files
+
+### Quick start
+
+Given a suite of Gesel files, we can use the **gesel** C++ library to validate their formatting.
+
+```cpp
+#include "gesel/gesel.hpp"
+
+auto num_genes = gesel::validate_genes("my/path/to/genes/9606_");
+gesel::validate_database("my/path/to/db/9606_", num_genes);
+```
+
+This takes the path prefix to a species-specific suite of Gesel files and validates their contents,
+throwing an error if any invalid formatting is detected.
+Note that the gene mapping files can be stored in a different directory from the other files.
+
+Check out the [reference documentation](https://gesel-inc.github.io/gesel-spec) for more information.
+
+### Building projects
+
+If you're using CMake, you just need to add something like this to your `CMakeLists.txt`:
+
+```cmake
+include(FetchContent)
+
+FetchContent_Declare(
+  takane 
+  GIT_REPOSITORY https://github.com/ArtifactDB/takane
+  GIT_TAG master # or any version of interest
+)
+
+FetchContent_MakeAvailable(takane)
+```
+
+Then you can link to **takane** to make the headers available during compilation:
+
+```cmake
+# For executables:
+target_link_libraries(myexe takane)
+
+# For libaries
+target_link_libraries(mylib INTERFACE takane)
+```
+
+Alternatively, you can install the library by cloning a suitable version of this repository and running the following commands:
+
+```sh
+mkdir build && cd build
+cmake .. -DTAKANE_TESTS=OFF
+cmake --build . --target install
+```
+
+Then you can use `find_package()` as usual:
+
+```cmake
+find_package(artifactdb_takane CONFIG REQUIRED)
+target_link_libraries(mylib INTERFACE artifactdb::takane)
+```
+
+If you're not using CMake, the simple approach is to just copy the files in the `include/` subdirectory - 
+either directly or with Git submodules - and include their path during compilation with, e.g., GCC's `-I`.
+You will also need to link to the dependencies listed in the [`extern/CMakeLists.txt`](extern/CMakeLists.txt) directory. 
