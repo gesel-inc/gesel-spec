@@ -113,7 +113,7 @@ inline void validate_database(const std::string& prefix, uint64_t num_genes) {
             auto tok_info = internal::load_named_ranges(prefix + ranges_path);
             internal::check_tokens(tok_info.first, ranges_path);
             if (tok_info.first.size() != tokens.size()) {
-                throw std::runtime_error("different numbers of tokens from " + type + " between '" + ranges_path + "' and 'sets.tsv'");
+                throw std::runtime_error("different number of tokens from " + type + " between '" + ranges_path + "' and 'sets.tsv'");
             }
 
             internal::check_indices<false>(
