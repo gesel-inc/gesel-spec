@@ -27,6 +27,7 @@ inline uint64_t validate_genes(const std::string& prefix, const std::vector<std:
         auto candidate = internal::check_genes(prefix + t + ".tsv.gz");
         if (first) {
             num_genes = candidate;
+            first = false;
         } else if (candidate != num_genes) {
             throw std::runtime_error("inconsistent number of genes between types (" + std::to_string(num_genes) + " for " + types.front() + ", " + std::to_string(candidate) + " for " + t + ")");
         }
@@ -55,7 +56,14 @@ inline uint64_t validate_genes(const std::string& prefix) {
         if (name.rfind(raw_prefix, 0) != 0) {
             continue;
         }
-        types.push_back(name.substr(raw_prefix.size(), name.size()));
+        if (name.size() < 6) {
+            continue;
+        }
+        size_t ext_loc = name.size() - 7;
+        if (name.rfind(".tsv.gz", ext_loc) != ext_loc) {
+            continue;
+        }
+        types.push_back(name.substr(raw_prefix.size(), ext_loc - raw_prefix.size()));
     }
 
     return validate_genes(prefix, types);
