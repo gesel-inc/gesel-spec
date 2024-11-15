@@ -22,6 +22,7 @@ add_executable(
     src/check_set_details.cpp
     src/check_collection_details.cpp
     src/check_genes.cpp
+    src/validate_database.cpp
 )
 
 target_link_libraries(

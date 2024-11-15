@@ -13,7 +13,7 @@ namespace gesel {
 
 namespace internal {
 
-void check_collection_details(const std::string& path, const std::vector<uint64_t>& ranges, const std::vector<uint64_t>& numbers) {
+inline void check_collection_details(const std::string& path, const std::vector<uint64_t>& ranges, const std::vector<uint64_t>& numbers) {
     byteme::RawFileReader raw_r(path);
     auto gzpath = path + ".gz";
     byteme::GzipFileReader gzip_r(gzpath);

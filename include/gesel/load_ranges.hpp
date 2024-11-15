@@ -92,12 +92,12 @@ inline std::vector<uint64_t> load_named_ranges(const std::string& path) {
         output_byte.push_back(byte_size);
 
         for (auto x : name) {
-            if ((x < 'A' || x > 'Z') && (x < 'a' || x > 'z') && (x < '0' || x > '9') && (x != '-')) {
-                throw std::runtime_error("names should only contain alphanumeric characters or dash in '" + path + "' " + append_line_number(line));
+            if ((x < 'a' || x > 'z') && (x < '0' || x > '9') && (x != '-')) {
+                throw std::runtime_error("tokens should only contain lower-case alphabetical characters, digits or a dash in '" + path + "' " + append_line_number(line));
             }
         }
         if (line && name <= last) {
-            throw std::runtime_error("names should be unique and lexicographically sorted in '" + path + "' " + append_line_number(line));
+            throw std::runtime_error("tokens should be unique and lexicographically sorted in '" + path + "' " + append_line_number(line));
         } 
         last.swap(name);
 

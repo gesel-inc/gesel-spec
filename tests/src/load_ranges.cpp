@@ -155,7 +155,7 @@ TEST(LoadNamedRanges, Failure) {
         byteme::GzipFileWriter writer(path);
         writer.write("alpha\t0\nbravo\t23\ncharlie delta\t5\necho0foxtrot0\t456\ngolf-hotel\t2\n");
     }
-    expect_error([&]() { gesel::internal::load_named_ranges(path); }, "alphanumeric");
+    expect_error([&]() { gesel::internal::load_named_ranges(path); }, "alphabetical");
 
     {
         byteme::GzipFileWriter writer(path);
