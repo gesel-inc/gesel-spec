@@ -9,12 +9,18 @@
 #include <stdexcept> 
 #include <filesystem>
 
+/**
+ * @file validate_genes.hpp
+ * @brief Validate gene mapping files.
+ */
+
 namespace gesel {
 
 /**
- * Validate Gesel gene files for a particular species.
+ * Validate Gesel gene mapping files for a particular species.
+ * Any invalid formatting or inconsistency between files will result in an error.
  *
- * @param prefix Prefix for the Gesel gene files.
+ * @param prefix Prefix for the Gesel gene mapping files.
  * This should be of the form `<DIRECTORY>/<SPECIES>_`, where `<SPECIES>` is an NCBI taxonomy ID.
  * @param types Vector of gene name types, e.g., `"ensembl"`, `"symbol"`.
  *
@@ -36,8 +42,8 @@ inline uint64_t validate_genes(const std::string& prefix, const std::vector<std:
 }
 
 /**
- * Overload for validating Gesel gene files for a particular species.
- * This will scan the directory for all files starting with `prefix`.
+ * Overload for `validate_genes()`.
+ * This will scan the directory for all files starting with `prefix` and ending with `".tsv.gz"`.
  *
  * @param prefix Prefix for the Gesel gene files.
  * This should be of the form `<DIRECTORY>/<SPECIES>_`, where `<SPECIES>` is an NCBI taxonomy ID.

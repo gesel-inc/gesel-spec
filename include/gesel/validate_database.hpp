@@ -12,6 +12,11 @@
 #include <vector>
 #include <unordered_map>
 
+/**
+ * @file validate_database.hpp
+ * @brief Validate database files.
+ */
+
 namespace gesel {
 
 /**
@@ -65,6 +70,8 @@ inline void check_tokens(const std::vector<std::string>& tokens, const std::stri
 
 /**
  * Validate Gesel database files for a particular species.
+ * This checks all files for validity and consistency except for the gene mapping files (which are validated by `validate_genes()`).
+ * Any invalid formatting or inconsistency between files will result in an error.
  *
  * @param prefix Prefix for the Gesel database files.
  * This should be of the form `<DIRECTORY>/<SPECIES>_`, where `<SPECIES>` is an NCBI taxonomy ID.
