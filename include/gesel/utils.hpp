@@ -16,7 +16,7 @@ inline std::string append_line_number(uint64_t line) {
         return " (line " + std::to_string(line + 1) + ")";
     }
 }
-    
+
 }
 
 }

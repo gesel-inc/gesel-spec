@@ -122,14 +122,12 @@ TEST(LoadNamedRanges, Success) {
 
     {
         byteme::GzipFileWriter writer(path);
-        writer.write("alpha\t1\nbravo\t23\ncharlie delta\t5\necho0foxtrot0\t456\ngolf_hotel\t56789\n");
+        writer.write("alpha\t1\nbravo\t23\ncharlie-delta\t5\necho0foxtrot0\t456\ngolf-hotel\t56789\n");
     }
 
     auto output = gesel::internal::load_named_ranges(path);
-    std::vector<std::string> expected_names { "alpha", "bravo", "charlie delta", "echo0foxtrot0", "golf_hotel" };
-    EXPECT_EQ(output.first, expected_names);
     std::vector<uint64_t> expected_bytes { 1, 23, 5, 456, 56789 };
-    EXPECT_EQ(output.second, expected_bytes);
+    EXPECT_EQ(output, expected_bytes);
 }
 
 TEST(LoadNamedRanges, Failure) {
@@ -137,21 +135,39 @@ TEST(LoadNamedRanges, Failure) {
 
     {
         byteme::GzipFileWriter writer(path);
-        writer.write("alpha\nbravo\t23\ncharlie delta\t5\necho0foxtrot0\t456\ngolf_hotel\t56789\n");
+        writer.write("alpha\nbravo\t23\ncharlie-delta\t5\necho0foxtrot0\t456\ngolf-hotel\t56789\n");
     }
     expect_error([&]() { gesel::internal::load_named_ranges(path); }, "newline");
 
     {
         byteme::GzipFileWriter writer(path);
-        writer.write("alpha\t0\t0\nbravo\t23\ncharlie delta\t5\necho0foxtrot0\t456\ngolf_hotel\t56789\n");
+        writer.write("alpha\t0\t0\nbravo\t23\ncharlie-delta\t5\necho0foxtrot0\t456\ngolf-hotel\t56789\n");
     }
     expect_error([&]() { gesel::internal::load_named_ranges(path); }, "non-digit");
 
     {
         byteme::GzipFileWriter writer(path);
-        writer.write("alpha\t0\nbravo\t23\ncharlie delta\t5\necho0foxtrot0\t456\ngolf_hotel");
+        writer.write("alpha\t0\nbravo\t23\ncharlie-delta\t5\necho0foxtrot0\t456\ngolf-hotel");
     }
     expect_error([&]() { gesel::internal::load_named_ranges(path); }, "terminating newline");
+
+    {
+        byteme::GzipFileWriter writer(path);
+        writer.write("alpha\t0\nbravo\t23\ncharlie delta\t5\necho0foxtrot0\t456\ngolf-hotel\t2\n");
+    }
+    expect_error([&]() { gesel::internal::load_named_ranges(path); }, "alphanumeric");
+
+    {
+        byteme::GzipFileWriter writer(path);
+        writer.write("bravo\t0\nbravo\t23\necho0foxtrot0\t456\ngolf-hotel\t42\n");
+    }
+    expect_error([&]() { gesel::internal::load_named_ranges(path); }, "sorted");
+
+    {
+        byteme::GzipFileWriter writer(path);
+        writer.write("bravo\t0\ngamma\t52\nalpha\t23\necho0foxtrot0\t456\ngolf-hotel\t21\n");
+    }
+    expect_error([&]() { gesel::internal::load_named_ranges(path); }, "sorted");
 
     // All the other checks are the same as those in load_ranges.
 }
