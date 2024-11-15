@@ -44,7 +44,7 @@ by adding 1 to the number of bytes (for the newline) and computing the cumulativ
 ### Gene mapping
 
 Each gene can be associated with one, zero or multiple names of different types (e.g., Ensembl identifiers, symbols). 
-For each type of gene name, we expect a file named `<TYPE>.tsv.gz`.
+For each type of gene name, we expect a "gene mapping" file named `<TYPE>.tsv.gz`.
 This is a Gzip-compressed tab-separated file where each line corresponds to a gene and the tab-separated fields are the names for that gene.
 Different genes may have different number of fields, and an empty line indicates that the equivalence class contains no names of that type.
 
@@ -56,6 +56,8 @@ Any type of gene name can be used, but most Gesel clients will expect one or mor
 
 All files have the same number of lines as they represent different names of the same genes.
 Each gene's identity (i.e., the "gene index") is defined as the 0-based index of the corresponding line in each file.
+
+At least one gene mapping file should be present for each species.
 
 ### Collection details
 

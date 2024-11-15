@@ -32,6 +32,8 @@ TEST(ValidateGenes, Failure) {
     }
     std::filesystem::create_directory(path);
 
+    expect_error([&]() { gesel::validate_genes(path + "/9606_"); }, "at least one");
+
     {
         byteme::GzipFileWriter swriter(path + "/9606_symbol.tsv.gz");
         swriter.write("alpha\nbravo\tcharlie\ndelta\techo\tfoxtrot\n\ngolf\thotel\nindia\n");
