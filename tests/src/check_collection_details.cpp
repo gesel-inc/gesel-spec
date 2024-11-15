@@ -28,7 +28,7 @@ TEST(CheckCollectionDetails, Failure) {
 
     std::string payload1 = "aaron's collection\tthis is aaron's collection\t12345\tAaron Lun\thttps://aaron.net";
     std::string payload2 = "yet another collection\tsomeone else's collection\t9999\tSomeone else\thttps://someone.else.com";
-    std::vector<uint64_t> ranges { static_cast<uint64_t>(payload1.size()), static_cast<uint64_t>(payload2.size()) };
+    uint64_t r1 = payload1.size(), r2 = payload2.size();
 
     {
         byteme::RawFileWriter rwriter(path);
@@ -36,7 +36,7 @@ TEST(CheckCollectionDetails, Failure) {
         byteme::GzipFileWriter gwriter(path + ".gz");
         gwriter.write(payload1 + "\t12\n" + payload2 + "\t55\n");
     }
-    expect_error([&]() { gesel::internal::check_collection_details(path, ranges, std::vector<uint64_t>{ 12, 55 }); }, "non-digit");
+    expect_error([&]() { gesel::internal::check_collection_details(path, std::vector<uint64_t>{ r1, r2 }, std::vector<uint64_t>{ 12, 55 }); }, "non-digit");
 
     {
         byteme::RawFileWriter rwriter(path);
@@ -44,7 +44,7 @@ TEST(CheckCollectionDetails, Failure) {
         byteme::GzipFileWriter gwriter(path + ".gz");
         gwriter.write(payload1 + "\t12\n" + payload2 + "\t55\n");
     }
-    expect_error([&]() { gesel::internal::check_collection_details(path, ranges, std::vector<uint64_t>{ 12, 55 }); }, "non-digit");
+    expect_error([&]() { gesel::internal::check_collection_details(path, std::vector<uint64_t>{ r1, r2 }, std::vector<uint64_t>{ 12, 55 }); }, "non-digit");
 
     {
         byteme::RawFileWriter rwriter(path);
@@ -52,15 +52,7 @@ TEST(CheckCollectionDetails, Failure) {
         byteme::GzipFileWriter gwriter(path + ".gz");
         gwriter.write(payload1 + "\t12\n" + payload2 + "\t55\n");
     }
-    expect_error([&]() { gesel::internal::check_collection_details(path, ranges, std::vector<uint64_t>{ 12, 55 }); }, "tab");
-
-    {
-        byteme::RawFileWriter rwriter(path);
-        rwriter.write(payload1 + "\n");
-        byteme::GzipFileWriter gwriter(path + ".gz");
-        gwriter.write(payload1 + "\t12\n");
-    }
-    expect_error([&]() { gesel::internal::check_collection_details(path, ranges, std::vector<uint64_t>{ 12, 55 }); }, "number of lines");
+    expect_error([&]() { gesel::internal::check_collection_details(path, std::vector<uint64_t>{ r1, r2 }, std::vector<uint64_t>{ 12, 55 }); }, "tab");
 
     {
         byteme::RawFileWriter rwriter(path);
@@ -68,11 +60,8 @@ TEST(CheckCollectionDetails, Failure) {
         byteme::GzipFileWriter gwriter(path + ".gz");
         gwriter.write(payload1 + "\t12\n" + payload2 + "\t55\n");
     }
-    expect_error([&]() { 
-        std::vector<uint64_t> ranges2 = ranges;
-        ++(ranges2.front());
-        gesel::internal::check_collection_details(path, ranges2, std::vector<uint64_t>{ 12, 55 });
-    }, "number of bytes");
+    expect_error([&]() { gesel::internal::check_collection_details(path, std::vector<uint64_t>{ r1 }, std::vector<uint64_t>{ 12 }); }, "number of lines");
+    expect_error([&]() { gesel::internal::check_collection_details(path, std::vector<uint64_t>{ r1 + 1, r2 }, std::vector<uint64_t>{ 12, 55 }); }, "number of bytes");
 
     {
         byteme::RawFileWriter rwriter(path);
@@ -80,7 +69,7 @@ TEST(CheckCollectionDetails, Failure) {
         byteme::GzipFileWriter gwriter(path + ".gz");
         gwriter.write(payload1 + "\t12\n");
     }
-    expect_error([&]() { gesel::internal::check_collection_details(path, ranges, std::vector<uint64_t>{ 12, 55 }); }, "early termination");
+    expect_error([&]() { gesel::internal::check_collection_details(path, std::vector<uint64_t>{ r1, r2 }, std::vector<uint64_t>{ 12, 55 }); }, "early termination");
 
     {
         byteme::RawFileWriter rwriter(path);
@@ -88,7 +77,7 @@ TEST(CheckCollectionDetails, Failure) {
         byteme::GzipFileWriter gwriter(path + ".gz");
         gwriter.write(payload1 + "\t12\nfoobar\tsomeone else's collection\t9999\tSomeone else\thttps://someone.else.com\t55\n");
     }
-    expect_error([&]() { gesel::internal::check_collection_details(path, ranges, std::vector<uint64_t>{ 12, 55 }); }, "different title");
+    expect_error([&]() { gesel::internal::check_collection_details(path, std::vector<uint64_t>{ r1, r2 }, std::vector<uint64_t>{ 12, 55 }); }, "different title");
 
     {
         byteme::RawFileWriter rwriter(path);
@@ -96,7 +85,7 @@ TEST(CheckCollectionDetails, Failure) {
         byteme::GzipFileWriter gwriter(path + ".gz");
         gwriter.write(payload1 + "\t12\nyet another collection\tfoo bar\t9999\tSomeone else\thttps://someone.else.com\t55\n");
     }
-    expect_error([&]() { gesel::internal::check_collection_details(path, ranges, std::vector<uint64_t>{ 12, 55 }); }, "different description");
+    expect_error([&]() { gesel::internal::check_collection_details(path, std::vector<uint64_t>{ r1, r2 }, std::vector<uint64_t>{ 12, 55 }); }, "different description");
 
     {
         byteme::RawFileWriter rwriter(path);
@@ -104,7 +93,7 @@ TEST(CheckCollectionDetails, Failure) {
         byteme::GzipFileWriter gwriter(path + ".gz");
         gwriter.write(payload1 + "\t12\nyet another collection\tsomeone else's collection\t9998\tSomeone else\thttps://someone.else.com\t55\n");
     }
-    expect_error([&]() { gesel::internal::check_collection_details(path, ranges, std::vector<uint64_t>{ 12, 55 }); }, "different species");
+    expect_error([&]() { gesel::internal::check_collection_details(path, std::vector<uint64_t>{ r1, r2 }, std::vector<uint64_t>{ 12, 55 }); }, "different species");
 
     {
         byteme::RawFileWriter rwriter(path);
@@ -112,7 +101,7 @@ TEST(CheckCollectionDetails, Failure) {
         byteme::GzipFileWriter gwriter(path + ".gz");
         gwriter.write(payload1 + "\t12\nyet another collection\tsomeone else's collection\t9999\tStill Aaron\thttps://someone.else.com\t55\n");
     }
-    expect_error([&]() { gesel::internal::check_collection_details(path, ranges, std::vector<uint64_t>{ 12, 55 }); }, "different maintainer");
+    expect_error([&]() { gesel::internal::check_collection_details(path, std::vector<uint64_t>{ r1, r2 }, std::vector<uint64_t>{ 12, 55 }); }, "different maintainer");
 
     {
         byteme::RawFileWriter rwriter(path);
@@ -120,7 +109,7 @@ TEST(CheckCollectionDetails, Failure) {
         byteme::GzipFileWriter gwriter(path + ".gz");
         gwriter.write(payload1 + "\t12\nyet another collection\tsomeone else's collection\t9999\tSomeone else\thttps://aaron.com\t55\n");
     }
-    expect_error([&]() { gesel::internal::check_collection_details(path, ranges, std::vector<uint64_t>{ 12, 55 }); }, "different source");
+    expect_error([&]() { gesel::internal::check_collection_details(path, std::vector<uint64_t>{ r1, r2 }, std::vector<uint64_t>{ 12, 55 }); }, "different source");
 
     {
         byteme::RawFileWriter rwriter(path);
@@ -128,7 +117,7 @@ TEST(CheckCollectionDetails, Failure) {
         byteme::GzipFileWriter gwriter(path + ".gz");
         gwriter.write(payload1 + "\t12\n" + payload2 + "\t55\n");
     }
-    expect_error([&]() { gesel::internal::check_collection_details(path, ranges, std::vector<uint64_t>{ 12, 54 }); }, "different number");
+    expect_error([&]() { gesel::internal::check_collection_details(path, std::vector<uint64_t>{ r1, r2 }, std::vector<uint64_t>{ 12, 54 }); }, "different number");
 
     {
         byteme::RawFileWriter rwriter(path);
@@ -136,9 +125,5 @@ TEST(CheckCollectionDetails, Failure) {
         byteme::GzipFileWriter gwriter(path + ".gz");
         gwriter.write(payload1 + "\t12\n" + payload2 + "\t55\n");
     }
-    expect_error([&]() { 
-        auto copy = ranges;
-        copy.push_back(0);
-        gesel::internal::check_collection_details(path, copy, std::vector<uint64_t>{ 12, 55, 0 }); 
-    }, "number of lines");
+    expect_error([&]() { gesel::internal::check_collection_details(path, std::vector<uint64_t>{ r1, r2, 0 }, std::vector<uint64_t>{ 12, 55, 0 }); }, "number of lines");
 }
