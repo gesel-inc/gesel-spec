@@ -67,10 +67,6 @@ void check_set_details(const std::string& path, const std::vector<uint64_t>& ran
     }
 }
 
-inline void check_set_details(const std::string& path, const std::vector<uint64_t>& ranges, const std::vector<uint64_t>& sizes) {
-    check_set_details(path, ranges, sizes, [&](uint64_t, const std::string&, const std::string&) {});
-}
-
 }
 
 }
