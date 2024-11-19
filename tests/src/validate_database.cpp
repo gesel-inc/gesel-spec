@@ -7,7 +7,6 @@
 #include <unordered_map>
 #include <algorithm>
 
-#include "byteme/temp_file_path.hpp"
 #include "gesel/validate_database.hpp"
 #include "utils.h"
 
@@ -181,13 +180,13 @@ protected:
 };
 
 TEST_F(TestValidateDatabase, Basic) {
-    auto path = byteme::temp_file_path("validation");
+    auto path = temp_file_path("validation");
     mock_database(path, "9606_");
     gesel::validate_database(path + "/9606_", max_genes);
 }
 
 TEST_F(TestValidateDatabase, CollectionFailures) {
-    auto path = byteme::temp_file_path("validation");
+    auto path = temp_file_path("validation");
     mock_database(path, "9606_");
 
     // Verify that the collections are indeed checked.
@@ -214,7 +213,7 @@ TEST_F(TestValidateDatabase, CollectionFailures) {
 }
 
 TEST_F(TestValidateDatabase, SetFailures) {
-    auto path = byteme::temp_file_path("validation");
+    auto path = temp_file_path("validation");
     mock_database(path, "9606_");
 
     {
@@ -299,7 +298,7 @@ TEST_F(TestValidateDatabase, SetFailures) {
 }
 
 TEST_F(TestValidateDatabase, SetToGeneFailures) {
-    auto path = byteme::temp_file_path("validation");
+    auto path = temp_file_path("validation");
     mock_database(path, "9606_");
 
     {

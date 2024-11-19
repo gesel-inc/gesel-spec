@@ -2,12 +2,11 @@
 #include <gmock/gmock.h>
 
 #include "gesel/check_collection_details.hpp"
-#include "byteme/temp_file_path.hpp"
 
 #include "utils.h"
 
 TEST(CheckCollectionDetails, Success) {
-    auto path = byteme::temp_file_path("check_collections");
+    auto path = temp_file_path("check_collections");
 
     std::string payload1 = "aaron's collection\tthis is aaron's collection\t12345\tAaron Lun\thttps://aaron.net";
     std::string payload2 = "yet another collection\tsomeone else's collection\t9999\tSomeone else\thttps://someone.else.com";
@@ -24,7 +23,7 @@ TEST(CheckCollectionDetails, Success) {
 }
 
 TEST(CheckCollectionDetails, Failure) {
-    auto path = byteme::temp_file_path("check_collections");
+    auto path = temp_file_path("check_collections");
 
     std::string payload1 = "aaron's collection\tthis is aaron's collection\t12345\tAaron Lun\thttps://aaron.net";
     std::string payload2 = "yet another collection\tsomeone else's collection\t9999\tSomeone else\thttps://someone.else.com";

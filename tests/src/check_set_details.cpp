@@ -2,7 +2,6 @@
 #include <gmock/gmock.h>
 
 #include "gesel/check_set_details.hpp"
-#include "byteme/temp_file_path.hpp"
 
 #include "utils.h"
 
@@ -14,7 +13,7 @@ protected:
 };
 
 TEST_F(TestCheckSetDetails, Success) {
-    auto path = byteme::temp_file_path("check_sets");
+    auto path = temp_file_path("check_sets");
 
     std::string payload1 = "aaron's set\tthis is aaron's set";
     std::string payload2 = "another set\tyet another set";
@@ -31,7 +30,7 @@ TEST_F(TestCheckSetDetails, Success) {
 }
 
 TEST_F(TestCheckSetDetails, Failure) {
-    auto path = byteme::temp_file_path("check_sets");
+    auto path = temp_file_path("check_sets");
 
     std::string payload1 = "aaron's set\tthis is aaron's set";
     std::string payload2 = "another set\tyet another set";

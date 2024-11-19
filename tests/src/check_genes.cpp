@@ -2,12 +2,11 @@
 #include <gmock/gmock.h>
 
 #include "gesel/check_genes.hpp"
-#include "byteme/temp_file_path.hpp"
 
 #include "utils.h"
 
 TEST(CheckGenes, Success) {
-    auto path = byteme::temp_file_path("check_genes") + ".gz";
+    auto path = temp_file_path("check_genes") + ".gz";
 
     {
         byteme::GzipFileWriter gwriter(path);
@@ -31,7 +30,7 @@ TEST(CheckGenes, Success) {
 }
 
 TEST(CheckGenes, Failure) {
-    auto path = byteme::temp_file_path("check_genes") + ".gz";
+    auto path = temp_file_path("check_genes") + ".gz";
 
     {
         byteme::GzipFileWriter gwriter(path);

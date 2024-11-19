@@ -2,7 +2,6 @@
 #include <gmock/gmock.h>
 
 #include "gesel/check_indices.hpp"
-#include "byteme/temp_file_path.hpp"
 
 #include "utils.h"
 
@@ -20,7 +19,7 @@ protected:
 };
 
 TEST_F(TestCheckIndices, Success) {
-    auto path = byteme::temp_file_path("check_indices");
+    auto path = temp_file_path("check_indices");
 
     std::string payload = "0\t123\t45\n6\n780\t1\t234\t45\n\n67\t890\n";
     {
@@ -61,7 +60,7 @@ TEST_F(TestCheckIndices, Success) {
 }
 
 TEST_F(TestCheckIndices, RawFailure) {
-    auto path = byteme::temp_file_path("check_indices");
+    auto path = temp_file_path("check_indices");
 
     // Basic checks for correct integer parsing.
     {
@@ -137,7 +136,7 @@ TEST_F(TestCheckIndices, RawFailure) {
 }
 
 TEST_F(TestCheckIndices, GzipFailure) {
-    auto path = byteme::temp_file_path("check_indices");
+    auto path = temp_file_path("check_indices");
 
     {
         byteme::RawFileWriter rwriter(path);

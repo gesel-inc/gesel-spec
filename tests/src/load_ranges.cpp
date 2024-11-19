@@ -2,12 +2,11 @@
 #include <gmock/gmock.h>
 
 #include "gesel/load_ranges.hpp"
-#include "byteme/temp_file_path.hpp"
 
 #include "utils.h"
 
 TEST(LoadRanges, Success) {
-    auto path = byteme::temp_file_path("load_ranges");
+    auto path = temp_file_path("load_ranges");
 
     {
         {
@@ -33,7 +32,7 @@ TEST(LoadRanges, Success) {
 }
 
 TEST(LoadRanges, Failure) {
-    auto path = byteme::temp_file_path("load_ranges");
+    auto path = temp_file_path("load_ranges");
 
     {
         byteme::GzipFileWriter writer(path);
@@ -79,7 +78,7 @@ TEST(LoadRanges, Failure) {
 }
 
 TEST(LoadRangesWithSizes, Success) {
-    auto path = byteme::temp_file_path("load_ranges_with_sizes");
+    auto path = temp_file_path("load_ranges_with_sizes");
 
     {
         byteme::GzipFileWriter writer(path);
@@ -94,7 +93,7 @@ TEST(LoadRangesWithSizes, Success) {
 }
 
 TEST(LoadRangesWithSizes, Failure) {
-    auto path = byteme::temp_file_path("load_ranges_with_sizes");
+    auto path = temp_file_path("load_ranges_with_sizes");
 
     {
         byteme::GzipFileWriter writer(path);
@@ -118,7 +117,7 @@ TEST(LoadRangesWithSizes, Failure) {
 }
 
 TEST(LoadNamedRanges, Success) {
-    auto path = byteme::temp_file_path("load_named_ranges");
+    auto path = temp_file_path("load_named_ranges");
 
     {
         byteme::GzipFileWriter writer(path);
@@ -133,7 +132,7 @@ TEST(LoadNamedRanges, Success) {
 }
 
 TEST(LoadNamedRanges, Failure) {
-    auto path = byteme::temp_file_path("load_named_ranges");
+    auto path = temp_file_path("load_named_ranges");
 
     {
         byteme::GzipFileWriter writer(path);

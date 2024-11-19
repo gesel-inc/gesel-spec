@@ -5,12 +5,11 @@
 #include <string>
 #include <filesystem>
 
-#include "byteme/temp_file_path.hpp"
 #include "gesel/validate_genes.hpp"
 #include "utils.h"
 
 TEST(ValidateGenes, Basic) {
-    auto path = byteme::temp_file_path("validation");
+    auto path = temp_file_path("validation");
     if (std::filesystem::exists(path)) {
         std::filesystem::remove_all(path);
     }
@@ -26,7 +25,7 @@ TEST(ValidateGenes, Basic) {
 }
 
 TEST(ValidateGenes, Failure) {
-    auto path = byteme::temp_file_path("validation");
+    auto path = temp_file_path("validation");
     if (std::filesystem::exists(path)) {
         std::filesystem::remove_all(path);
     }
