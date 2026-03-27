@@ -58,41 +58,50 @@ protected:
     }
 
     static void save_collections(const std::string& path, const std::vector<std::string>& payloads, const std::vector<uint64_t>& sizes) {
-        byteme::RawFileWriter rwriter(path);
-        byteme::GzipFileWriter gwriter(path + ".gz");
-        byteme::GzipFileWriter rrwriter(path + ".ranges.gz");
-        for (size_t i = 0, end = sizes.size(); i < end; ++i) {
+        byteme::RawFileWriter rwriter(path.c_str(), {});
+        auto gzpath = path + ".gz";
+        byteme::GzipFileWriter gwriter(gzpath.c_str(), {});
+        auto rangepath = path + ".ranges.gz";
+        byteme::GzipFileWriter rrwriter(rangepath.c_str(), {});
+
+        for (std::size_t i = 0, end = sizes.size(); i < end; ++i) {
             const auto& current = payloads[i];
-            rwriter.write(current + "\n");
+            quick_write(rwriter, current + "\n");
             auto as_str = std::to_string(sizes[i]);
-            gwriter.write(current + "\t" + as_str + "\n");
-            rrwriter.write(std::to_string(current.size()) + "\t" + as_str + "\n");
+            quick_write(gwriter, current + "\t" + as_str + "\n");
+            quick_write(rrwriter, std::to_string(current.size()) + "\t" + as_str + "\n");
         }
     }
 
     static void save_sets(const std::string& path, const std::vector<std::pair<std::string, std::string> >& payloads, const std::vector<uint64_t>& sizes) {
-        byteme::RawFileWriter rwriter(path);
-        byteme::GzipFileWriter gwriter(path + ".gz");
-        byteme::GzipFileWriter rrwriter(path + ".ranges.gz");
-        for (size_t i = 0, end = sizes.size(); i < end; ++i) {
+        byteme::RawFileWriter rwriter(path.c_str(), {});
+        auto gzpath = path + ".gz";
+        byteme::GzipFileWriter gwriter(gzpath.c_str(), {});
+        auto rangepath = path + ".ranges.gz";
+        byteme::GzipFileWriter rrwriter(rangepath.c_str(), {});
+
+        for (std::size_t i = 0, end = sizes.size(); i < end; ++i) {
             const auto& current = payloads[i];
             auto combined = current.first + "\t" + current.second;
-            rwriter.write(combined + "\n");
+            quick_write(rwriter, combined + "\n");
             auto as_str = std::to_string(sizes[i]);
-            gwriter.write(combined + "\t" + as_str + "\n");
-            rrwriter.write(std::to_string(combined.size()) + "\t" + as_str + "\n");
+            quick_write(gwriter, combined + "\t" + as_str + "\n");
+            quick_write(rrwriter, std::to_string(combined.size()) + "\t" + as_str + "\n");
         }
     }
 
     static void save_indices(const std::string& path, const std::vector<std::vector<int > >& mapping) {
-        byteme::RawFileWriter rwriter(path);
-        byteme::GzipFileWriter gwriter(path + ".gz");
-        byteme::GzipFileWriter rrwriter(path + ".ranges.gz");
+        byteme::RawFileWriter rwriter(path.c_str(), {});
+        auto gzpath = path + ".gz";
+        byteme::GzipFileWriter gwriter(gzpath.c_str(), {});
+        auto rangepath = path + ".ranges.gz";
+        byteme::GzipFileWriter rrwriter(rangepath.c_str(), {});
+
         for (const auto& x : mapping) {
             auto as_str = delta_encode(x);
-            rwriter.write(as_str + "\n");
-            gwriter.write(as_str + "\n");
-            rrwriter.write(std::to_string(as_str.size()) + "\n");
+            quick_write(rwriter, as_str + "\n");
+            quick_write(gwriter, as_str + "\n");
+            quick_write(rrwriter, std::to_string(as_str.size()) + "\n");
         }
     }
 
@@ -143,14 +152,17 @@ protected:
                 }
                 std::sort(all_tokens.begin(), all_tokens.end());
 
-                byteme::RawFileWriter rwriter(path);
-                byteme::GzipFileWriter rrwriter(path + ".ranges.gz");
+                byteme::RawFileWriter rwriter(path.c_str(), {});
+                auto rangepath = path + ".ranges.gz";
+                byteme::GzipFileWriter rrwriter(rangepath.c_str(), {});
+
                 for (const auto& tok : all_tokens) {
                     auto encoded = delta_encode(tokens_to_sets.find(tok)->second);
-                    rwriter.write(encoded + "\n");
-                    rrwriter.write(tok + "\t" + std::to_string(encoded.size()) + "\n");
+                    quick_write(rwriter, encoded + "\n");
+                    quick_write(rrwriter, tok + "\t" + std::to_string(encoded.size()) + "\n");
                 }
             };
+
             deposit_token_text(dir + "/" + prefix + "tokens-names.tsv", token_n);
             deposit_token_text(dir + "/" + prefix + "tokens-descriptions.tsv", token_d);
         }
@@ -218,18 +230,13 @@ TEST_F(TestValidateDatabase, SetFailures) {
 
     {
         auto spath = path + "/9606_sets.tsv.ranges.gz";
+
         // Check the number of sets.
-        {
-            byteme::GzipFileWriter rrwriter(spath);
-            rrwriter.write("5\t5\n6\t6\n");
-        }
+        quick_gzip_write(spath, "5\t5\n6\t6\n");
         expect_error([&]() { gesel::validate_database(path + "/9606_", max_genes); }, "total number of sets");
 
         // Verify that the sets are indeed checked.
-        {
-            byteme::GzipFileWriter rrwriter(spath);
-            rrwriter.write("1\t1\n2\t2\n3\t3\n4\t4\n5\t5\n6\t6\n7\t7\n");
-        }
+        quick_gzip_write(spath, "1\t1\n2\t2\n3\t3\n4\t4\n5\t5\n6\t6\n7\t7\n");
         expect_error([&]() { gesel::validate_database(path + "/9606_", max_genes); }, "number of bytes");
     }
 
@@ -238,16 +245,11 @@ TEST_F(TestValidateDatabase, SetFailures) {
 
     {
         auto spath = path + "/9606_tokens-names.tsv.ranges.gz";
-        {
-            byteme::GzipFileWriter rrwriter(spath);
-            rrwriter.write("a\t1\nB C\t2\n");
-        }
+
+        quick_gzip_write(spath, "a\t1\nB C\t2\n");
         expect_error([&]() { gesel::validate_database(path + "/9606_", max_genes); }, "lower-case");
 
-        {
-            byteme::GzipFileWriter rrwriter(spath);
-            rrwriter.write("a\t1\nb\t2\n");
-        }
+        quick_gzip_write(spath, "a\t1\nb\t2\n");
         expect_error([&]() { gesel::validate_database(path + "/9606_", max_genes); }, "different number of tokens");
 
         std::vector<std::pair<std::string, std::string> > payloads = {
@@ -261,26 +263,18 @@ TEST_F(TestValidateDatabase, SetFailures) {
         };
         std::vector<uint64_t> sizes{ 1, 2, 3, 4, 5, 6, 7 };
         save_sets(path + "/9606_sets.tsv", payloads, sizes);
-        {
-            byteme::GzipFileWriter rrwriter(spath);
-            // No one should have zero bytes.
-            rrwriter.write("alpha\t0\nbravo\t0\ncharlie\t0\ndelta\t0\necho\t0\nfoxtrot\t0\ngolf\t0\n");
-        }
+
+        // No one should have zero bytes.
+        quick_gzip_write(spath, "alpha\t0\nbravo\t0\ncharlie\t0\ndelta\t0\necho\t0\nfoxtrot\t0\ngolf\t0\n");
         expect_error([&]() { gesel::validate_database(path + "/9606_", max_genes); }, "number of bytes");
 
-        {
-            byteme::GzipFileWriter rrwriter(spath);
-            // Just get the correct number of bytes to get through the first tranche of index checks.
-            // The first few tokens in 'tokens-names.tsv' should have exactly one (one-digit) set, because all of the
-            // first names of our waifus start with A and are unique; so the number of bytes is 1.
-            rrwriter.write("aaron\t1\nbravo\t1\ncharlie\t1\ndelta\t1\necho\t1\nfoxtrot\t1\ngolf\t1\n");
-        }
+        // Just get the correct number of bytes to get through the first tranche of index checks.
+        // The first few tokens in 'tokens-names.tsv' should have exactly one (one-digit) set, because all of the
+        // first names of our waifus start with A and are unique; so the number of bytes is 1.
+        quick_gzip_write(spath, "aaron\t1\nbravo\t1\ncharlie\t1\ndelta\t1\necho\t1\nfoxtrot\t1\ngolf\t1\n");
         expect_error([&]() { gesel::validate_database(path + "/9606_", max_genes); }, "not present");
 
-        {
-            byteme::GzipFileWriter rrwriter(spath);
-            rrwriter.write("alpha\t1\nbravo\t1\ncharlie\t1\ndelta\t1\necho\t1\nfoxtrot\t1\ngolf\t1\n"); // again, just get the correct number of bytes. 
-        }
+        quick_gzip_write(spath, "alpha\t1\nbravo\t1\ncharlie\t1\ndelta\t1\necho\t1\nfoxtrot\t1\ngolf\t1\n"); // again, just get the correct number of bytes. 
         expect_error([&]() { gesel::validate_database(path + "/9606_", max_genes); }, "inconsistent");
     }
 
@@ -289,10 +283,7 @@ TEST_F(TestValidateDatabase, SetFailures) {
 
     {
         auto spath = path + "/9606_tokens-descriptions.tsv.ranges.gz";
-        {
-            byteme::GzipFileWriter rrwriter(spath);
-            rrwriter.write("a\t1\nB C\t2\n");
-        }
+        quick_gzip_write(spath, "a\t1\nB C\t2\n");
         expect_error([&]() { gesel::validate_database(path + "/9606_", max_genes); }, "lower-case");
     }
 }
@@ -303,10 +294,7 @@ TEST_F(TestValidateDatabase, SetToGeneFailures) {
 
     {
         auto spath = path + "/9606_set2gene.tsv.ranges.gz";
-        {
-            byteme::GzipFileWriter rrwriter(spath);
-            rrwriter.write("1\n");
-        }
+        quick_gzip_write(spath, "1\n");
         expect_error([&]() { gesel::validate_database(path + "/9606_", max_genes); }, "number of lines in 'set2gene");
     }
 
@@ -328,10 +316,7 @@ TEST_F(TestValidateDatabase, SetToGeneFailures) {
     mock_database(path, "9606_");
     {
         auto spath = path + "/9606_gene2set.tsv.ranges.gz";
-        {
-            byteme::GzipFileWriter rrwriter(spath);
-            rrwriter.write("1\n");
-        }
+        quick_gzip_write(spath, "1\n");
         expect_error([&]() { gesel::validate_database(path + "/9606_", max_genes); }, "number of lines in 'gene2set");
     }
 

@@ -29,8 +29,8 @@ inline void check_bytes(const std::vector<uint64_t>& bytes) {
 }
 
 inline std::vector<uint64_t> load_ranges(const std::string& path) {
-    byteme::GzipFileReader reader(path);
-    byteme::PerByte pb(&reader);
+    byteme::GzipFileReader reader(path.c_str(), {});
+    byteme::SerialBufferedReader<char, decltype(&reader)> pb(&reader, 65536);
     std::vector<uint64_t> output;
 
     bool valid = pb.valid();
@@ -52,8 +52,8 @@ inline std::vector<uint64_t> load_ranges(const std::string& path) {
 }
 
 inline std::pair<std::vector<uint64_t>, std::vector<uint64_t> > load_ranges_with_sizes(const std::string& path) {
-    byteme::GzipFileReader reader(path);
-    byteme::PerByte pb(&reader);
+    byteme::GzipFileReader reader(path.c_str(), {});
+    byteme::SerialBufferedReader<char, decltype(&reader)> pb(&reader, 65536);
     std::vector<uint64_t> output_byte, output_size;
 
     bool valid = pb.valid();
@@ -78,8 +78,8 @@ inline std::pair<std::vector<uint64_t>, std::vector<uint64_t> > load_ranges_with
 }
 
 inline std::pair<std::vector<std::string>, std::vector<uint64_t> > load_named_ranges(const std::string& path) {
-    byteme::GzipFileReader reader(path);
-    byteme::PerByte pb(&reader);
+    byteme::GzipFileReader reader(path.c_str(), {});
+    byteme::SerialBufferedReader<char, decltype(&reader)> pb(&reader, 65536);
     std::vector<std::string> output_name; 
     std::vector<uint64_t> output_byte;
 

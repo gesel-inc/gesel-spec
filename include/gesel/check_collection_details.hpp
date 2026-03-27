@@ -14,12 +14,12 @@ namespace gesel {
 namespace internal {
 
 inline void check_collection_details(const std::string& path, const std::vector<uint64_t>& ranges, const std::vector<uint64_t>& numbers) {
-    byteme::RawFileReader raw_r(path);
+    byteme::RawFileReader raw_r(path.c_str(), {});
     auto gzpath = path + ".gz";
-    byteme::GzipFileReader gzip_r(gzpath);
+    byteme::GzipFileReader gzip_r(gzpath.c_str(), {});
 
-    byteme::PerByte raw_p(&raw_r);
-    byteme::PerByte gzip_p(&gzip_r);
+    byteme::SerialBufferedReader<char, decltype(&raw_r)> raw_p(&raw_r, 65536);
+    byteme::SerialBufferedReader<char, decltype(&gzip_r)> gzip_p(&gzip_r, 65536);
 
     bool raw_valid = raw_p.valid();
     bool gzip_valid = gzip_p.valid();

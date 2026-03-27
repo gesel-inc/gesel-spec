@@ -15,20 +15,20 @@ namespace internal {
 
 template<bool has_gzip_, class Extra_>
 void check_indices(const std::string& path, uint64_t index_limit, const std::vector<uint64_t>& ranges, Extra_ extra) {
-    byteme::RawFileReader raw_r(path);
+    byteme::RawFileReader raw_r(path.c_str(), {});
     auto gzpath = path + ".gz";
     auto gzip_r = [&]{
         if constexpr(has_gzip_) {
-            return byteme::GzipFileReader(gzpath);
+            return byteme::GzipFileReader(gzpath.c_str(), {});
         } else {
             return false;
         }
     }();
 
-    byteme::PerByte raw_p(&raw_r);
+    byteme::SerialBufferedReader<char, decltype(&raw_r)> raw_p(&raw_r, 65536);
     auto gzip_p = [&]{
         if constexpr(has_gzip_) {
-            return byteme::PerByte(&gzip_r);
+            return byteme::SerialBufferedReader<char, decltype(&gzip_r)>(&gzip_r, 65536);
         } else {
             return false;
         }

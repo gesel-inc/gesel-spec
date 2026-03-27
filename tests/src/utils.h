@@ -37,4 +37,34 @@ inline std::string temp_file_path(const std::string& base) {
     return full;
 }
 
+template<typename Writer_>
+void quick_write(Writer_& writer, const char* info) {
+    writer.write(reinterpret_cast<const unsigned char*>(info), std::strlen(info));
+}
+
+template<typename Writer_>
+void quick_write(Writer_& writer, const std::string& info) {
+    writer.write(reinterpret_cast<const unsigned char*>(info.c_str()), info.size());
+}
+
+inline void quick_text_write(const std::string& path, const char* info) {
+    byteme::RawFileWriter writer(path.c_str(), {});
+    quick_write(writer, info);
+}
+
+inline void quick_text_write(const std::string& path, const std::string& info) {
+    byteme::RawFileWriter writer(path.c_str(), {});
+    quick_write(writer, info);
+}
+
+inline void quick_gzip_write(const std::string& path, const char* info) {
+    byteme::GzipFileWriter writer(path.c_str(), {});
+    quick_write(writer, info);
+}
+
+inline void quick_gzip_write(const std::string& path, const std::string& info) {
+    byteme::GzipFileWriter writer(path.c_str(), {});
+    quick_write(writer, info);
+}
+
 #endif 

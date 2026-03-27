@@ -18,8 +18,8 @@ namespace gesel {
 namespace internal {
 
 inline uint64_t check_genes(const std::string& path) {
-    byteme::GzipFileReader reader(path);
-    byteme::PerByte pb(&reader);
+    byteme::GzipFileReader reader(path.c_str(), {});
+    byteme::SerialBufferedReader<char, decltype(&reader)> pb(&reader, 65536);
     std::vector<uint64_t> output;
 
     bool valid = pb.valid();

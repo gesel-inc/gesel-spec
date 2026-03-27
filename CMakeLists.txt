@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
 
 project(gesel
-    VERSION 0.1.0
+    VERSION 0.1.1
     DESCRIPTION "Validating the Gesel database files"
     LANGUAGES CXX)
 
@@ -19,7 +19,7 @@ option(GESEL_FETCH_EXTERN "Automatically fetch gesel's external dependencies." O
 if(GESEL_FETCH_EXTERN)
     add_subdirectory(extern)
 else()
-    find_package(ltla_byteme CONFIG REQUIRED)
+    find_package(ltla_byteme 2.1.2 CONFIG REQUIRED)
 endif()
 
 target_link_libraries(gesel INTERFACE ltla::byteme)
