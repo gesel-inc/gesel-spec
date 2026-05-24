@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['1_200_0',['Gesel file specification v0.1.0',['../index.html',1,'']]]
+  ['file_20specifications_0',['Gesel file specifications',['../index.html',1,'']]]
 ];
