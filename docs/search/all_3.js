@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['between_20sets_20and_20genes_0',['Mappings between sets and genes',['../index.html#autotoc_md7',1,'']]],
-  ['building_20projects_1',['Building projects',['../index.html#autotoc_md11',1,'']]]
+  ['file_20specification_20v0_201_200_0',['Gesel file specification v0.1.0',['../index.html',1,'']]]
 ];
