@@ -98,10 +98,10 @@ $(function(){ initResizable(false); });
 Functions</h2></td></tr>
 <tr class="memitem:abc7c78eb8c53bfe0fb7689cf3d13fa0f" id="r_abc7c78eb8c53bfe0fb7689cf3d13fa0f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abc7c78eb8c53bfe0fb7689cf3d13fa0f">validate_database</a> (const std::string &amp;prefix, uint64_t num_genes)</td></tr>
 <tr class="separator:abc7c78eb8c53bfe0fb7689cf3d13fa0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a23c9159c734be4f259cee012f5dc0007" id="r_a23c9159c734be4f259cee012f5dc0007"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a23c9159c734be4f259cee012f5dc0007">validate_genes</a> (const std::string &amp;prefix, const std::vector&lt; std::string &gt; &amp;types)</td></tr>
-<tr class="separator:a23c9159c734be4f259cee012f5dc0007"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a10dc0ad0de78ad2843ffcb5465cb5ec1" id="r_a10dc0ad0de78ad2843ffcb5465cb5ec1"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a10dc0ad0de78ad2843ffcb5465cb5ec1">validate_genes</a> (const std::string &amp;prefix)</td></tr>
-<tr class="separator:a10dc0ad0de78ad2843ffcb5465cb5ec1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a04f169f348459b612456f87bda011584" id="r_a04f169f348459b612456f87bda011584"><td class="memItemLeft" align="right" valign="top">std::uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a04f169f348459b612456f87bda011584">validate_genes</a> (const std::string &amp;prefix, const std::vector&lt; std::string &gt; &amp;types)</td></tr>
+<tr class="separator:a04f169f348459b612456f87bda011584"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a72e8051cec8d20ab2422664d88e1368a" id="r_a72e8051cec8d20ab2422664d88e1368a"><td class="memItemLeft" align="right" valign="top">std::uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a72e8051cec8d20ab2422664d88e1368a">validate_genes</a> (const std::string &amp;prefix)</td></tr>
+<tr class="separator:a72e8051cec8d20ab2422664d88e1368a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Validate Gesel database and gene files. </p>
@@ -132,7 +132,7 @@ Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Validate Gesel database files for a particular species. This checks all files for validity and consistency except for the gene mapping files (which are validated by <code><a class="el" href="#a23c9159c734be4f259cee012f5dc0007">validate_genes()</a></code>). Any invalid formatting or inconsistency between files will result in an error.</p>
+<p>Validate Gesel database files for a particular species. This checks all files for validity and consistency except for the gene mapping files (which are validated by <code><a class="el" href="#a04f169f348459b612456f87bda011584">validate_genes()</a></code>). Any invalid formatting or inconsistency between files will result in an error.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">prefix</td><td>Prefix for the Gesel database files. This should be of the form <code>&lt;DIRECTORY&gt;/&lt;SPECIES&gt;_</code>, where <code>&lt;SPECIES&gt;</code> is an NCBI taxonomy ID. </td></tr>
@@ -143,8 +143,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a10dc0ad0de78ad2843ffcb5465cb5ec1" name="a10dc0ad0de78ad2843ffcb5465cb5ec1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a10dc0ad0de78ad2843ffcb5465cb5ec1">&#9670;&#160;</a></span>validate_genes() <span class="overload">[1/2]</span></h2>
+<a id="a72e8051cec8d20ab2422664d88e1368a" name="a72e8051cec8d20ab2422664d88e1368a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a72e8051cec8d20ab2422664d88e1368a">&#9670;&#160;</a></span>validate_genes() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -153,7 +153,7 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">uint64_t gesel::validate_genes </td>
+          <td class="memname">std::uint64_t gesel::validate_genes </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>prefix</em></span></td><td>)</td>
           <td></td>
@@ -165,7 +165,7 @@ Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Overload for <code><a class="el" href="#a23c9159c734be4f259cee012f5dc0007">validate_genes()</a></code>. This will scan the directory for all files starting with <code>prefix</code> and ending with <code>".tsv.gz"</code>.</p>
+<p>Overload for <code><a class="el" href="#a04f169f348459b612456f87bda011584">validate_genes()</a></code>. This will automatically detect the identifier types, based on the version of the Gesel gene file specification. For versions below 0.2.0, it scans for all files starting with <code>prefix</code> and ending with <code>".tsv.gz"</code>, i.e., following the <code>&lt;prefix&gt;&lt;type&gt;.tsv.gz</code> pattern. For versions 0.2.0 or higher, it inspects the <code>&lt;prefix&gt;gene-version.tsv</code> file for the available types and then validates each file at <code>&lt;prefix&gt;gene-type-&lt;type&gt;tsv.gz</code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">prefix</td><td>Prefix for the Gesel gene files. This should be of the form <code>&lt;DIRECTORY&gt;/&lt;SPECIES&gt;_</code>, where <code>&lt;SPECIES&gt;</code> is an NCBI taxonomy ID.</td></tr>
@@ -176,8 +176,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a23c9159c734be4f259cee012f5dc0007" name="a23c9159c734be4f259cee012f5dc0007"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a23c9159c734be4f259cee012f5dc0007">&#9670;&#160;</a></span>validate_genes() <span class="overload">[2/2]</span></h2>
+<a id="a04f169f348459b612456f87bda011584" name="a04f169f348459b612456f87bda011584"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a04f169f348459b612456f87bda011584">&#9670;&#160;</a></span>validate_genes() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -186,7 +186,7 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">uint64_t gesel::validate_genes </td>
+          <td class="memname">std::uint64_t gesel::validate_genes </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>prefix</em></span>, </td>
         </tr>
@@ -206,7 +206,7 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">prefix</td><td>Prefix for the Gesel gene mapping files. This should be of the form <code>&lt;DIRECTORY&gt;/&lt;SPECIES&gt;_</code>, where <code>&lt;SPECIES&gt;</code> is an NCBI taxonomy ID. </td></tr>
-    <tr><td class="paramname">types</td><td>Vector of gene name types, e.g., <code>"ensembl"</code>, <code>"symbol"</code>. This should contain at least one value.</td></tr>
+    <tr><td class="paramname">types</td><td>Vector of gene identifier types, e.g., <code>"ensembl"</code>, <code>"symbol"</code>. This should contain at least one value.</td></tr>
   </table>
   </dd>
 </dl>
