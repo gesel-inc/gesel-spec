@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 3.24)
 
 project(gesel
-    VERSION 0.1.1
-    DESCRIPTION "Validating the Gesel database files"
-    LANGUAGES CXX)
+    VERSION 0.2.0
+    DESCRIPTION "Validating Gesel file formats"
+    LANGUAGES CXX
+)
 
 add_library(gesel INTERFACE)
 add_library(gesel::gesel ALIAS gesel)
