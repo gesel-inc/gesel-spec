@@ -1,4 +1,4 @@
-# Gesel file specification v0.1.0
+# Gesel file specifications 
 
 ![Unit tests](https://github.com/gesel-inc/gesel-spec/actions/workflows/run-tests.yaml/badge.svg)
 ![Documentation](https://github.com/gesel-inc/gesel-spec/actions/workflows/doxygenate.yaml/badge.svg)
@@ -13,12 +13,12 @@ Once created, the files can be hosted on a static file server without requiring 
 ## Specifications
 
 The Gesel database files contain information about the gene set collections.
-Links to the specifications for these files are below:
+Links to the specifications for these files are listed below:
 
 - [0.1.0](docs/specifications/db_0.1.0.md)
 
 The Gesel gene annotation files contain information about the genes involved in the gene sets.
-Links to the specifications for these files are below:
+Links to the specifications for these files are listed below:
 
 - [0.1.0](docs/specifications/gene_0.1.0.md)
 - [0.2.0](docs/specifications/gene_0.2.0.md)
@@ -51,7 +51,7 @@ The following table lists the correspondence between the **gesel** library and t
 |Library|Database|Gene|
 |----|------|----|
 |0.1.\*|0.1.0|0.1.0|
-|0.2.\*|0.1.0|0.2.0|
+|0.2.\*|0.1.0|0.1.0, 0.2.0|
 
 ### Building projects
 
@@ -62,7 +62,7 @@ include(FetchContent)
 
 FetchContent_Declare(
   gesel 
-  GIT_REPOSITORY https://github.com/gesel-inc/gesel
+  GIT_REPOSITORY https://github.com/gesel-inc/gesel-spec
   GIT_TAG master # or any version of interest
 )
 
@@ -83,7 +83,7 @@ Alternatively, you can install the library by cloning a suitable version of this
 
 ```sh
 mkdir build && cd build
-cmake .. -DTAKANE_TESTS=OFF
+cmake .. -DGESEL_TESTS=OFF
 cmake --build . --target install
 ```
 
