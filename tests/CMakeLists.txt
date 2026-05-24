@@ -24,6 +24,7 @@ add_executable(
     src/check_genes.cpp
     src/validate_database.cpp
     src/validate_genes.cpp
+    src/check_version.cpp
 )
 
 target_link_libraries(

@@ -20,6 +20,7 @@ if(GESEL_FETCH_EXTERN)
     add_subdirectory(extern)
 else()
     find_package(ltla_byteme 2.1.2 CONFIG REQUIRED)
+    find_package(ltla_sanisizer 0.2.0 CONFIG REQUIRED)
 endif()
 
 target_link_libraries(gesel INTERFACE ltla::byteme)

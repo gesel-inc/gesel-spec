@@ -1,7 +1,8 @@
 @PACKAGE_INIT@
 
 include(CMakeFindDependencyMacro)
-find_dependency(ltla_byteme 2.1.2 CONFIG REQUIRED)
+find_dependency(ltla_byteme 2.1.2 CONFIG)
+find_dependency(ltla_sanisizer 0.2.0 CONFIG)
 
 if(@GESEL_FIND_ZLIB@)
     find_package(ZLIB)
