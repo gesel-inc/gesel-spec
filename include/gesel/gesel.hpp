@@ -6,12 +6,12 @@
 
 /**
  * @file gesel.hpp
- * @brief Validate Gesel database and gene files
+ * @brief Validate Gesel-related file formats
  */
 
 /**
  * @namespace gesel
- * @brief Validate Gesel database and gene files
+ * @brief Validate Gesel-related file formats
  */
 namespace gesel {}
 

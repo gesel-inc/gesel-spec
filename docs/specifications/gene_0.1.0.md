@@ -7,9 +7,9 @@ Each Gesel gene annotation instance consists of several files, each of which con
 
 ## General rules
 
-For validation purposes, it is assumed that all files associated with a single Gesel gene file set are located in the same directory.
-However, this should be a separate directory from the Gesel database files.
-This distinction allows arbitrary gene identifier types to be used in the gene identifier file names without conflicting with other files in the Gesel database.
+For validation purposes, it is assumed that all files associated with a single Gesel gene annotation instance are located in the same directory.
+However, this should be a separate directory from that used to store the Gesel database files.
+This separation allows the use of arbitrary gene identifier types to be used in the file names (see below) without conflicting with the Gesel database files.
 
 All files associated with a Gesel gene annotation instance should have the same prefix.
 This allows multiple instances to be stored in the same directory (e.g., for different species), distinguished by their prefix.

@@ -13,16 +13,19 @@
 
 /**
  * @file validate_genes.hpp
- * @brief Validate gene mapping files.
+ * @brief Validate gene files.
  */
 
 namespace gesel {
 
 /**
- * Validate Gesel gene mapping files for a particular species.
+ * Validate Gesel gene annotation files (version 0.1.0) for a particular species.
  * Any invalid formatting or inconsistency between files will result in an error.
  *
- * @param prefix Prefix for the Gesel gene mapping files.
+ * In general, users should call the `validate_genes()` overload that does not accept `types`.
+ * This specific overload is only provided to enable validation in the unfortunate case where the gene annotation files are saved in the same directory as the database files.
+ *
+ * @param prefix Prefix for the Gesel gene annotation files.
  * This should be of the form `<DIRECTORY>/<SPECIES>_`, where `<SPECIES>` is an NCBI taxonomy ID.
  * @param types Vector of gene identifier types, e.g., `"ensembl"`, `"symbol"`.
  * This should contain at least one value.
@@ -50,13 +53,13 @@ inline std::uint64_t validate_genes(const std::string& prefix, const std::vector
 }
 
 /**
- * Overload for `validate_genes()`.
- * This will automatically detect the identifier types, based on the version of the Gesel gene file specification.
- * For versions below 0.2.0, it scans for all files starting with `prefix` and ending with `".tsv.gz"`, i.e., following the `<prefix><type>.tsv.gz` pattern.
- * For versions 0.2.0 or higher, it inspects the `<prefix>gene-version.tsv` file for the available types and then validates each file at `<prefix>gene-type-<type>tsv.gz`.
+ * Validate Gesel gene annotation files of any version for a particular species.
+ * Any invalid formatting or inconsistency between files will result in an error.
  *
- * @param prefix Prefix for the Gesel gene files.
- * This should be of the form `<DIRECTORY>/<SPECIES>_`, where `<SPECIES>` is an NCBI taxonomy ID.
+ * For version 0.1.0, this function scans for all files starting with `prefix` and ending with `".tsv.gz"`, i.e., following the `<prefix><type>.tsv.gz` pattern.
+ * This may not work correctly when the gene annotation files are saved in the same directory as the database files.
+ *
+ * @param prefix Prefix for the Gesel gene annotation files.
  *
  * @return Number of genes.
  */

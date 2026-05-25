@@ -42,6 +42,9 @@ which is the 0-based index of the line containing the gene's identities in any o
 All gene indices should be less than the total number of available genes in the gene annotation.
 See any version of the Gesel gene file specification (`gene_*.md`) for more details.
 
+Strictly speaking, the prefix of the Gesel database instance does not need to be the same as the prefix of its accompanying gene annotation instance.
+However, downstream applications may expect identical prefixes as it simplifies the correspondence between the two instances.
+
 ## Expected files
 
 ### Collection details
