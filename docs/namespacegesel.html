@@ -91,7 +91,7 @@ $(function(){ initResizable(false); });
 </div><!--header-->
 <div class="contents">
 
-<p>Validate Gesel database and gene files.  
+<p>Validate Gesel-related file formats.  
 <a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
@@ -104,7 +104,7 @@ Functions</h2></td></tr>
 <tr class="separator:a72e8051cec8d20ab2422664d88e1368a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Validate Gesel database and gene files. </p>
+<div class="textblock"><p>Validate Gesel-related file formats. </p>
 </div><h2 class="groupheader">Function Documentation</h2>
 <a id="abc7c78eb8c53bfe0fb7689cf3d13fa0f" name="abc7c78eb8c53bfe0fb7689cf3d13fa0f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#abc7c78eb8c53bfe0fb7689cf3d13fa0f">&#9670;&#160;</a></span>validate_database()</h2>
@@ -132,11 +132,11 @@ Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Validate Gesel database files for a particular species. This checks all files for validity and consistency except for the gene mapping files (which are validated by <code><a class="el" href="#a04f169f348459b612456f87bda011584">validate_genes()</a></code>). Any invalid formatting or inconsistency between files will result in an error.</p>
+<p>Validate Gesel database files for a particular species. Any invalid formatting or inconsistency between files will result in an error.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">prefix</td><td>Prefix for the Gesel database files. This should be of the form <code>&lt;DIRECTORY&gt;/&lt;SPECIES&gt;_</code>, where <code>&lt;SPECIES&gt;</code> is an NCBI taxonomy ID. </td></tr>
-    <tr><td class="paramname">num_genes</td><td>Total number of genes for this species. </td></tr>
+    <tr><td class="paramname">prefix</td><td>Prefix for the Gesel database files. </td></tr>
+    <tr><td class="paramname">num_genes</td><td>Total number of genes for this species. This should be obtained from the accompanying gene annotation files, validated by <code><a class="el" href="#a04f169f348459b612456f87bda011584">validate_genes()</a></code>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -165,10 +165,11 @@ Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Overload for <code><a class="el" href="#a04f169f348459b612456f87bda011584">validate_genes()</a></code>. This will automatically detect the identifier types, based on the version of the Gesel gene file specification. For versions below 0.2.0, it scans for all files starting with <code>prefix</code> and ending with <code>".tsv.gz"</code>, i.e., following the <code>&lt;prefix&gt;&lt;type&gt;.tsv.gz</code> pattern. For versions 0.2.0 or higher, it inspects the <code>&lt;prefix&gt;gene-version.tsv</code> file for the available types and then validates each file at <code>&lt;prefix&gt;gene-type-&lt;type&gt;tsv.gz</code>.</p>
+<p>Validate Gesel gene annotation files of any version for a particular species. Any invalid formatting or inconsistency between files will result in an error.</p>
+<p>For version 0.1.0, this function scans for all files starting with <code>prefix</code> and ending with <code>".tsv.gz"</code>, i.e., following the <code>&lt;prefix&gt;&lt;type&gt;.tsv.gz</code> pattern. This may not work correctly when the gene annotation files are saved in the same directory as the database files.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">prefix</td><td>Prefix for the Gesel gene files. This should be of the form <code>&lt;DIRECTORY&gt;/&lt;SPECIES&gt;_</code>, where <code>&lt;SPECIES&gt;</code> is an NCBI taxonomy ID.</td></tr>
+    <tr><td class="paramname">prefix</td><td>Prefix for the Gesel gene annotation files.</td></tr>
   </table>
   </dd>
 </dl>
@@ -202,10 +203,11 @@ Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Validate Gesel gene mapping files for a particular species. Any invalid formatting or inconsistency between files will result in an error.</p>
+<p>Validate Gesel gene annotation files (version 0.1.0) for a particular species. Any invalid formatting or inconsistency between files will result in an error.</p>
+<p>In general, users should call the <code><a class="el" href="#a04f169f348459b612456f87bda011584">validate_genes()</a></code> overload that does not accept <code>types</code>. This specific overload is only provided to enable validation in the unfortunate case where the gene annotation files are saved in the same directory as the database files.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">prefix</td><td>Prefix for the Gesel gene mapping files. This should be of the form <code>&lt;DIRECTORY&gt;/&lt;SPECIES&gt;_</code>, where <code>&lt;SPECIES&gt;</code> is an NCBI taxonomy ID. </td></tr>
+    <tr><td class="paramname">prefix</td><td>Prefix for the Gesel gene annotation files. This should be of the form <code>&lt;DIRECTORY&gt;/&lt;SPECIES&gt;_</code>, where <code>&lt;SPECIES&gt;</code> is an NCBI taxonomy ID. </td></tr>
     <tr><td class="paramname">types</td><td>Vector of gene identifier types, e.g., <code>"ensembl"</code>, <code>"symbol"</code>. This should contain at least one value.</td></tr>
   </table>
   </dd>
