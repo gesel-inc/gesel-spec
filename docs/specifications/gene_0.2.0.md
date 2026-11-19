@@ -31,8 +31,9 @@ None of the free-text fields in any of the files should contain special characte
 ### Manifest
 
 `PREFIX_gene-types.tsv` should contain the types of the gene identifiers.
-Each line should contain one type, which should be a non-empty string that consists of alphanumeric characters only (i.e., `A-Za-z0-9`).
+Each line should contain one identifier type, which should be a non-empty string that consists of alphanumeric characters only (i.e., `A-Za-z0-9`).
 At least one line should be present.
+Identifier types may be in any order but should be unique. 
 
 ### Gene identifiers
 

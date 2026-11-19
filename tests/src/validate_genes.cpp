@@ -89,4 +89,7 @@ TEST(ValidateGenes, Error_020) {
     quick_gzip_write(path + "/9606_gene-type-symbol.tsv.gz", "alpha\n");
     quick_gzip_write(path + "/9606_gene-type-ensembl.tsv.gz", "ALPHA\nBRAVO\tCHARLIE\nDELTA\tECHO\tFOXTROT\n\nGOLF\tHOTEL\nINDIA\n");
     expect_error([&]() { gesel::validate_genes(path + "/9606_"); }, "number of genes is different");
+
+    quick_text_write(path + "/9606_gene-types.tsv", "symbol\nensembl\nensembl\n");
+    expect_error([&]() { gesel::validate_genes(path + "/9606_"); }, "duplicated gene identifier");
 }

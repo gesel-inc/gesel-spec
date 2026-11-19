@@ -12,6 +12,7 @@
 #include <exception>
 #include <filesystem>
 #include <optional>
+#include <unordered_set>
 
 #include "sanisizer/sanisizer.hpp"
 
@@ -39,7 +40,7 @@ namespace gesel {
 inline std::uint64_t validate_genes(const std::string& prefix, const std::vector<std::string>& types) {
     std::optional<std::uint64_t> num_genes;
 
-    for (auto t : types) {
+    for (const auto& t : types) {
         try {
             auto candidate = internal::check_genes(prefix + t + ".tsv.gz");
             if (!num_genes.has_value()) {
@@ -143,6 +144,15 @@ inline std::uint64_t validate_genes(const std::string& prefix) {
                 if (!pb.advance()) {
                     break;
                 }
+            }
+
+            std::unordered_set<std::string> utypes;
+            utypes.reserve(types.size());
+            for (const auto& t : types) {
+                if (utypes.find(t) != utypes.end()) {
+                    throw std::runtime_error("detected duplicated gene identifier type '" + t + "'");
+                }
+                utypes.insert(t);
             }
         } catch (...) {
             std::throw_with_nested(std::runtime_error("failed to parse gene identifier types from 'gene-types.tsv'"));
