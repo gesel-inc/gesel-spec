@@ -27,5 +27,5 @@ TEST(CheckGenes, Failure) {
     expect_error([&]() { gesel::internal::check_genes(path); }, "empty name");
 
     quick_gzip_write(path, "alpha\nbravo\tcharlie\tbravo\ndelta\techo\tfoxtrot\n\ngolf\thotel\nindia\n");
-    expect_error([&]() { gesel::internal::check_genes(path); }, "duplicated names");
+    expect_error([&]() { gesel::internal::check_genes(path); }, "duplicated name");
 }

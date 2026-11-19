@@ -6,6 +6,7 @@
 #include <tuple>
 #include <cstdint>
 #include <type_traits>
+#include <algorithm>
 
 #include "byteme/byteme.hpp"
 #include "sanisizer/sanisizer.hpp"
@@ -14,12 +15,19 @@ namespace gesel {
 
 namespace internal {
 
-inline std::string append_line_number(std::uint64_t line) {
-    if (line == std::numeric_limits<std::uint64_t>::max()) {
-        return " (line 18446744073709551616)";
-    } else {
-        return " (line " + std::to_string(line + 1) + ")";
+inline std::string to_string(std::uint64_t line) {
+    // Custom-rolled version of std::to_string() that avoids locale changes.
+    // It also works if uint64_t isn't an alias for the standard integer types.
+    if (line == 0) {
+        return "0";
     }
+    std::string output;
+    while (line) {
+        output += static_cast<char>((line % 10) + '0');
+        line /= 10;
+    }
+    std::reverse(output.begin(), output.end());
+    return output;
 }
 
 inline bool invalid_token_character(char x) {
@@ -35,7 +43,7 @@ bool add_next_digit(Integer_& current, Integer_ delta) {
     constexpr Integer_ add_limit = std::numeric_limits<Integer_>::max() % 10;
 
     if (current >= div_limit && (current > div_limit || delta > add_limit)) { // most of the time we should fail the first condition.
-        return false;
+        throw std::overflow_error("integer overflow");
     }
     
     current *= 10;

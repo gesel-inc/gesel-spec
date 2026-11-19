@@ -67,7 +67,7 @@ TEST_F(TestCheckIndices, RawFailure) {
 
     // Alright, moving onto some more interesting failures.
     quick_text_write(path, "12\n");
-    expect_error([&]() { check_indices<false>(path, 10, std::vector<uint64_t>{ 3 }); }, "out-of-range");
+    expect_error([&]() { check_indices<false>(path, 10, std::vector<uint64_t>{ 2 }); }, "out-of-range");
 
     quick_text_write(path, "3\t0\t5\n");
     expect_error([&]() { check_indices<false>(path, 10, std::vector<uint64_t>{ 5 }); }, "duplicate index");
@@ -79,7 +79,7 @@ TEST_F(TestCheckIndices, RawFailure) {
     expect_error([&]() { check_indices<false>(path, 10, std::vector<uint64_t>{ 5 }); }, "number of lines");
 
     quick_text_write(path, "3\t4\t2\n1\t4\n");
-    expect_error([&]() { check_indices<false>(path, 10, std::vector<uint64_t>{ 5, 4 }); }, "number of bytes per line");
+    expect_error([&]() { check_indices<false>(path, 10, std::vector<uint64_t>{ 5, 4 }); }, "number of bytes");
 
     quick_text_write(path, "3\t4\t2\n1\t4\n");
     expect_error([&]() { check_indices<false>(path, 10, std::vector<uint64_t>{ 5, 3, 1 }); }, "number of lines");
@@ -107,9 +107,9 @@ TEST_F(TestCheckIndices, GzipFailure) {
 
     quick_text_write(path, "0\n2\n3\n");
     quick_gzip_write(path + ".gz", "0\n2\t3\n3\n");
-    expect_error([&]() { check_indices<true>(path, 10, std::vector<uint64_t>{ 1, 1, 1 }); }, "different indices");
+    expect_error([&]() { check_indices<true>(path, 10, std::vector<uint64_t>{ 1, 1, 1 }); }, "indices are different");
 
     quick_text_write(path, "0\n2\t2\n3\n");
     quick_gzip_write(path + ".gz", "0\n2\t3\n3\n");
-    expect_error([&]() { check_indices<true>(path, 10, std::vector<uint64_t>{ 1, 3, 1 }); }, "different indices");
+    expect_error([&]() { check_indices<true>(path, 10, std::vector<uint64_t>{ 1, 3, 1 }); }, "indices are different");
 }

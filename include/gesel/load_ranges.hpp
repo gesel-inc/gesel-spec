@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <limits>
 #include <stdexcept>
+#include <exception>
 #include <vector>
 #include <string>
 
@@ -37,9 +38,20 @@ inline std::vector<std::uint64_t> load_ranges(const std::string& path) {
     bool valid = pb.valid();
     std::uint64_t line = 0;
     while (valid) {
-        const auto number = parse_integer_field<FieldType::LAST>(pb, valid, path, line);
-        output.push_back(number);
-        sanisizer::increment(line);
+        try {
+            const auto number = [&]{
+                try {
+                    return parse_integer_field<FieldType::LAST>(pb, valid);
+                } catch (...) {
+                    std::throw_with_nested(std::runtime_error("failed to parse byte count"));
+                }
+            }();
+            output.push_back(number);
+
+            sanisizer::increment(line);
+        } catch (...) {
+            std::throw_with_nested(std::runtime_error("failed to load line " + to_string(line)));
+        }
     }
 
     check_bytes(output);
@@ -54,11 +66,29 @@ inline std::pair<std::vector<std::uint64_t>, std::vector<std::uint64_t> > load_r
     bool valid = pb.valid();
     std::uint64_t line = 0;
     while (valid) {
-        const auto byte_size = parse_integer_field<FieldType::MIDDLE>(pb, valid, path, line);
-        output_byte.push_back(byte_size);
-        const auto other_size = parse_integer_field<FieldType::LAST>(pb, valid, path, line);
-        output_size.push_back(other_size);
-        sanisizer::increment(line);
+        try {
+            const auto byte_size = [&]{
+                try {
+                    return parse_integer_field<FieldType::MIDDLE>(pb, valid);
+                } catch (...) {
+                    std::throw_with_nested(std::runtime_error("failed to parse byte count"));
+                }
+            }();
+            output_byte.push_back(byte_size);
+
+            const auto other_size = [&]{
+                try {
+                    return parse_integer_field<FieldType::LAST>(pb, valid);
+                } catch (...) {
+                    std::throw_with_nested(std::runtime_error("failed to parse size"));
+                }
+            }();
+            output_size.push_back(other_size);
+
+            sanisizer::increment(line);
+        } catch (...) {
+            std::throw_with_nested(std::runtime_error("failed to load line " + to_string(line)));
+        }
     }
 
     check_bytes(output_byte);
@@ -74,10 +104,24 @@ inline std::pair<std::vector<std::string>, std::vector<std::uint64_t> > load_nam
     bool valid = pb.valid();
     std::uint64_t line = 0;
     while (valid) {
-        const auto name = parse_string_field<FieldType::MIDDLE>(pb, valid, path, line);
+        const auto name = [&]{
+            try {
+                return parse_string_field<FieldType::MIDDLE>(pb, valid);
+            } catch (...) {
+                std::throw_with_nested(std::runtime_error("failed to parse name"));
+            }
+        }();
         output_name.push_back(std::move(name));
-        const auto byte_size = parse_integer_field<FieldType::LAST>(pb, valid, path, line);
+
+        const auto byte_size = [&]{
+            try {
+                return parse_integer_field<FieldType::LAST>(pb, valid);
+            } catch (...) {
+                std::throw_with_nested(std::runtime_error("failed to parse byte count"));
+            }
+        }();
         output_byte.push_back(byte_size);
+
         sanisizer::increment(line);
     }
 

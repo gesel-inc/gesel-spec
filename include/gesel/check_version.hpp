@@ -98,47 +98,45 @@ inline Version check_version(const std::string& version_path) {
         }();
 
         if (limit <= position) {
-            throw std::runtime_error("premature termination of the version string at '" + version_path + "'");
+            throw std::runtime_error("premature termination");
         }
 
         const auto start = buffer[position];
         if (start == '0') {
             ++position;
             if (limit <= position) {
-                throw std::runtime_error("premature termination of the version string at '" + version_path + "'");
+                throw std::runtime_error("premature termination");
             } else if (buffer[position] != term) {
-                throw std::runtime_error("leading zeros detected in the version string at '" + version_path + "'");
+                throw std::runtime_error("detected leading zeros");
             }
             ++position;
 
         } else if (start > '0' && start <= '9') {
             auto current = start;
             while (1) {
-                if (!add_next_digit(target, current - '0')) {
-                    throw std::runtime_error("overflow in version numbers at '" + version_path + "'");
-                }
+                add_next_digit(target, current - '0');
                 ++position;
                 if (limit <= position) {
-                    throw std::runtime_error("premature termination of the version string at '" + version_path + "'");
+                    throw std::runtime_error("premature termination");
                 } 
                 current = buffer[position];
                 if (current == term) {
                     ++position;
                     break;
                 } else if (current < '0' || current > '9') {
-                    throw std::runtime_error("non-digit characters detected in the version string at '" + version_path + "'");
+                    throw std::runtime_error("detected non-digit character");
                 }
             }
 
         } else if (start == term) {
-            throw std::runtime_error("empty field in the version string at '" + version_path + "'");
+            throw std::runtime_error("detected empty field"); 
         } else {
-            throw std::runtime_error("non-digit characters detected in the version string at '" + version_path + "'");
+            throw std::runtime_error("detected non-digit character");
         }
     }
 
     if (limit != position) {
-        throw std::runtime_error("additional characters after the version string at '" + version_path + "'");
+        throw std::runtime_error("additional characters after the version string");
     }
     return output;
 }

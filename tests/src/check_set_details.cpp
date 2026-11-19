@@ -45,7 +45,7 @@ TEST_F(TestCheckSetDetails, Failure) {
     quick_text_write(path, payload1 + "\n" + payload2 + "\n");
     quick_gzip_write(path + ".gz", payload1 + "\t51\n" + payload2 + "\t82\n");
     expect_error([&]() { check_set_details(path, std::vector<uint64_t>{ r1 }, std::vector<uint64_t>{ 51 }); }, "number of lines");
-    expect_error([&]() { check_set_details(path, std::vector<uint64_t>{ r1 + 1, r2 }, std::vector<uint64_t>{ 51, 82 }); }, "bytes per line");
+    expect_error([&]() { check_set_details(path, std::vector<uint64_t>{ r1 + 1, r2 }, std::vector<uint64_t>{ 51, 82 }); }, "number of bytes");
 
     quick_text_write(path, payload1 + "\n" + payload2 + "\n");
     quick_gzip_write(path + ".gz", payload1 + "\t51\n");
@@ -53,15 +53,15 @@ TEST_F(TestCheckSetDetails, Failure) {
 
     quick_text_write(path, payload1 + "\n" + payload2 + "\n");
     quick_gzip_write(path + ".gz", payload1 + "\t51\nfoo bar\tyet another set\t82\n");
-    expect_error([&]() { check_set_details(path, std::vector<uint64_t>{ r1, r2 }, std::vector<uint64_t>{ 51, 82 }); }, "different name");
+    expect_error([&]() { check_set_details(path, std::vector<uint64_t>{ r1, r2 }, std::vector<uint64_t>{ 51, 82 }); }, "name is different");
 
     quick_text_write(path, payload1 + "\n" + payload2 + "\n");
     quick_gzip_write(path + ".gz", payload1 + "\t51\nanother set\tfoobar\t82\n");
-    expect_error([&]() { check_set_details(path, std::vector<uint64_t>{ r1, r2 }, std::vector<uint64_t>{ 51, 82 }); }, "different description");
+    expect_error([&]() { check_set_details(path, std::vector<uint64_t>{ r1, r2 }, std::vector<uint64_t>{ 51, 82 }); }, "description is different");
 
     quick_text_write(path, payload1 + "\n" + payload2 + "\n");
     quick_gzip_write(path + ".gz", payload1 + "\t51\n" + payload2 + "\t82\n");
-    expect_error([&]() { check_set_details(path, std::vector<uint64_t>{ r1, r2 }, std::vector<uint64_t>{ 52, 82 }); }, "different size");
+    expect_error([&]() { check_set_details(path, std::vector<uint64_t>{ r1, r2 }, std::vector<uint64_t>{ 52, 82 }); }, "set size is not consistent");
     expect_error([&]() { check_set_details(path, std::vector<uint64_t>{ r1, r2, 42 }, std::vector<uint64_t>{ 51, 82, 93 }); }, "number of lines");
 
     // Checking if the extra code is actually run.

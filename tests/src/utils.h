@@ -4,7 +4,18 @@
 #include <stdexcept>
 #include <string>
 #include <filesystem>
+#include <exception>
 #include <random>
+
+inline std::string unwrap_error(std::exception& e) {
+    std::string msg = e.what();
+    try {
+        std::rethrow_if_nested(e);
+    } catch (std::exception& e) {
+        msg += "; " + unwrap_error(e);
+    }
+    return msg;
+}
 
 template<typename Function_>
 void expect_error(Function_ fun, std::string match) {
@@ -15,7 +26,7 @@ void expect_error(Function_ fun, std::string match) {
         fun();
     } catch(std::exception& e) {
         failed = true;
-        msg = e.what();
+        msg = unwrap_error(e);
     }
 
     ASSERT_TRUE(failed) << "function did not throw an exception with message '" << match << "'";

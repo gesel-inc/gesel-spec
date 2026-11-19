@@ -48,27 +48,27 @@ TEST(CheckCollectionDetails, Failure) {
 
     quick_text_write(path, payload1 + "\n" + payload2 + "\n");
     quick_gzip_write(path + ".gz", payload1 + "\t12\nfoobar\tsomeone else's collection\t9999\tSomeone else\thttps://someone.else.com\t55\n");
-    expect_error([&]() { gesel::internal::check_collection_details(path, std::vector<uint64_t>{ r1, r2 }, std::vector<uint64_t>{ 12, 55 }); }, "different title");
+    expect_error([&]() { gesel::internal::check_collection_details(path, std::vector<uint64_t>{ r1, r2 }, std::vector<uint64_t>{ 12, 55 }); }, "title is different");
 
     quick_text_write(path, payload1 + "\n" + payload2 + "\n");
     quick_gzip_write(path + ".gz", payload1 + "\t12\nyet another collection\tfoo bar\t9999\tSomeone else\thttps://someone.else.com\t55\n");
-    expect_error([&]() { gesel::internal::check_collection_details(path, std::vector<uint64_t>{ r1, r2 }, std::vector<uint64_t>{ 12, 55 }); }, "different description");
+    expect_error([&]() { gesel::internal::check_collection_details(path, std::vector<uint64_t>{ r1, r2 }, std::vector<uint64_t>{ 12, 55 }); }, "description is different");
 
     quick_text_write(path, payload1 + "\n" + payload2 + "\n");
     quick_gzip_write(path + ".gz", payload1 + "\t12\nyet another collection\tsomeone else's collection\t9998\tSomeone else\thttps://someone.else.com\t55\n");
-    expect_error([&]() { gesel::internal::check_collection_details(path, std::vector<uint64_t>{ r1, r2 }, std::vector<uint64_t>{ 12, 55 }); }, "different species");
+    expect_error([&]() { gesel::internal::check_collection_details(path, std::vector<uint64_t>{ r1, r2 }, std::vector<uint64_t>{ 12, 55 }); }, "species is different");
 
     quick_text_write(path, payload1 + "\n" + payload2 + "\n");
     quick_gzip_write(path + ".gz", payload1 + "\t12\nyet another collection\tsomeone else's collection\t9999\tStill Aaron\thttps://someone.else.com\t55\n");
-    expect_error([&]() { gesel::internal::check_collection_details(path, std::vector<uint64_t>{ r1, r2 }, std::vector<uint64_t>{ 12, 55 }); }, "different maintainer");
+    expect_error([&]() { gesel::internal::check_collection_details(path, std::vector<uint64_t>{ r1, r2 }, std::vector<uint64_t>{ 12, 55 }); }, "maintainer is different");
 
     quick_text_write(path, payload1 + "\n" + payload2 + "\n");
     quick_gzip_write(path + ".gz", payload1 + "\t12\nyet another collection\tsomeone else's collection\t9999\tSomeone else\thttps://aaron.com\t55\n");
-    expect_error([&]() { gesel::internal::check_collection_details(path, std::vector<uint64_t>{ r1, r2 }, std::vector<uint64_t>{ 12, 55 }); }, "different source");
+    expect_error([&]() { gesel::internal::check_collection_details(path, std::vector<uint64_t>{ r1, r2 }, std::vector<uint64_t>{ 12, 55 }); }, "source is different");
 
     quick_text_write(path, payload1 + "\n" + payload2 + "\n");
     quick_gzip_write(path + ".gz", payload1 + "\t12\n" + payload2 + "\t55\n");
-    expect_error([&]() { gesel::internal::check_collection_details(path, std::vector<uint64_t>{ r1, r2 }, std::vector<uint64_t>{ 12, 54 }); }, "different number");
+    expect_error([&]() { gesel::internal::check_collection_details(path, std::vector<uint64_t>{ r1, r2 }, std::vector<uint64_t>{ 12, 54 }); }, "number of sets is not consistent");
 
     quick_text_write(path, payload1 + "\n" + payload2 + "\n");
     quick_gzip_write(path + ".gz", payload1 + "\t12\n" + payload2 + "\t55\n");

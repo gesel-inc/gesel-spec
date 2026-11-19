@@ -17,7 +17,7 @@ enum class FieldType : char { LAST, MIDDLE, UNKNOWN };
 
 template<FieldType type_, class ByteSource_>
 typename std::conditional<type_ == FieldType::UNKNOWN, std::pair<std::uint64_t, bool>, std::uint64_t>::type
-parse_integer_field(ByteSource_& pb, bool& valid, const std::string& path, std::uint64_t line) {
+parse_integer_field(ByteSource_& pb, bool& valid) {
     std::uint64_t number = 0;
     std::uint64_t ndigits = 0;
     std::uint64_t has_leading_zero = false;
@@ -40,28 +40,25 @@ parse_integer_field(ByteSource_& pb, bool& valid, const std::string& path, std::
         }
 
         if (c < '0' || c > '9') {
-            throw std::runtime_error("non-digit character detected in '" + path + "' " + append_line_number(line));
+            throw std::runtime_error("detected non-digit character");
         } else if (!valid) {
-            throw std::runtime_error("no terminating newline in '" + path + "' " + append_line_number(line));
+            throw std::runtime_error("no terminating newline");
         }
 
         const std::uint64_t delta = c - '0';
-        if (!add_next_digit(number, delta)) {
-            throw std::runtime_error("integer overflow in '" + path + "' " + append_line_number(line));
-        }
-
+        add_next_digit(number, delta);
         has_leading_zero += (ndigits == 0 && delta == 0);
         ++ndigits;
     } while (valid);
 
     if (number == 0) {
         if (ndigits > 1) {
-            throw std::runtime_error("leading zero detected in '" + path + "' " + append_line_number(line));
+            throw std::runtime_error("detected leading zero");
         } else if (ndigits == 0) {
-            throw std::runtime_error("empty field detected in '" + path + "' " + append_line_number(line));
+            throw std::runtime_error("detected empty field");
         }
     } else if (has_leading_zero) {
-        throw std::runtime_error("leading zero detected in '" + path + "' " + append_line_number(line));
+        throw std::runtime_error("detected leading zero");
     }
 
     if constexpr(type_ == FieldType::UNKNOWN) {
@@ -73,7 +70,7 @@ parse_integer_field(ByteSource_& pb, bool& valid, const std::string& path, std::
 
 template<FieldType type_, class ByteSource_>
 typename std::conditional<type_ == FieldType::UNKNOWN, std::pair<std::string, bool>, std::string>::type
-parse_string_field(ByteSource_& pb, bool& valid, const std::string& path, std::uint64_t line) {
+parse_string_field(ByteSource_& pb, bool& valid) {
     std::string value;
     bool terminated = false;
 
@@ -94,9 +91,9 @@ parse_string_field(ByteSource_& pb, bool& valid, const std::string& path, std::u
         }
 
         if (c == '\t' || c == '\n') {
-            throw std::runtime_error("string containing a newline or tab in '" + path + "' " + append_line_number(line));
+            throw std::runtime_error("string containing a newline or tab");
         } else if (!valid) {
-            throw std::runtime_error("no terminating newline in '" + path + "' " + append_line_number(line));
+            throw std::runtime_error("no terminating newline");
         }
 
         value += c;

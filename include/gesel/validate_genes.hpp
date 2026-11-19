@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <stdexcept> 
+#include <exception>
 #include <filesystem>
 #include <optional>
 
@@ -39,20 +40,20 @@ inline std::uint64_t validate_genes(const std::string& prefix, const std::vector
     std::optional<std::uint64_t> num_genes;
 
     for (auto t : types) {
-        auto candidate = internal::check_genes(prefix + t + ".tsv.gz");
-        if (!num_genes.has_value()) {
-            num_genes = candidate;
-        } else if (candidate != *num_genes) {
-            throw std::runtime_error(
-                "inconsistent number of genes between types (" + 
-                std::to_string(*num_genes) + " for " + types.front() + ", " +
-                std::to_string(candidate) + " for " + t + ")"
-            );
+        try {
+            auto candidate = internal::check_genes(prefix + t + ".tsv.gz");
+            if (!num_genes.has_value()) {
+                num_genes = candidate;
+            } else if (candidate != *num_genes) {
+                throw std::runtime_error("number of genes is different from that of type '" + types.front() + "'");
+            }
+        } catch (...) {
+            std::throw_with_nested(std::runtime_error("failed to validate '" + t + ".tsv.gz'"));
         }
     }
 
     if (!num_genes.has_value()) {
-        throw std::runtime_error("at least one gene name type should be present");
+        throw std::runtime_error("at least one gene identifier type should be present");
     }
     return *num_genes;
 }
@@ -72,10 +73,13 @@ inline std::uint64_t validate_genes(const std::string& prefix) {
     const std::string vpath = prefix + "gene-version.tsv";
     internal::Version version;
     if (std::filesystem::exists(vpath)) { 
-        version = internal::check_version(vpath);
+        try {
+            version = internal::check_version(vpath);
+        } catch (...) {
+            std::throw_with_nested(std::runtime_error("failed to parse 'gene-version.tsv'"));
+        }
     }
 
-    std::vector<std::string> types;
     if (version < internal::Version(0, 2, 0)) {
         // For version 0.1.*, the available types is inferred from the available files in the directory.
         // This is kinda fragile as it assumes that no other files start with 'prefix',
@@ -85,6 +89,7 @@ inline std::uint64_t validate_genes(const std::string& prefix) {
         auto dir = path.parent_path();
         auto raw_prefix = path.filename().string();
 
+        std::vector<std::string> types;
         for (const auto& entry : std::filesystem::directory_iterator(dir)) {
             std::string name = entry.path().filename().string();
             if (name.rfind(raw_prefix, 0) != 0) {
@@ -106,36 +111,41 @@ inline std::uint64_t validate_genes(const std::string& prefix) {
         // For versions at or above 0.2.0, we use a dedicated 'gene-types.tsv' file to specify the available types.
         // This can be easily consulted to figure out the available types.
         // Each file is also prefixed with 'gene-type-' to avoid conflicts with Gesel database files.
-        const auto manifest_path = prefix + "gene-types.tsv";
-        byteme::RawFileReader reader(manifest_path.c_str(), {});
-        byteme::SerialBufferedReader<char, internal::I<decltype(&reader)> > pb(&reader, sanisizer::cap<std::size_t>(65536));
-        if (!pb.valid()) {
-            throw std::runtime_error("expected at least one gene identifier type in '" + manifest_path + "'");
-        }
+        std::vector<std::string> types;
+        try {
+            const auto manifest_path = prefix + "gene-types.tsv";
+            byteme::RawFileReader reader(manifest_path.c_str(), {});
+            byteme::SerialBufferedReader<char, internal::I<decltype(&reader)> > pb(&reader, sanisizer::cap<std::size_t>(65536));
+            if (!pb.valid()) {
+                throw std::runtime_error("expected at least one gene identifier type");
+            }
 
-        while (1) {
-            std::string type;
-            char current = pb.get();
-            while (current != '\n') {
-                if ((current >= 'a' && current <= 'z') || (current >= 'A' && current <= 'Z') || (current >= '0' && current <= '9')) {
-                    type += current;
-                } else {
-                    throw std::runtime_error("gene identifier type should only contain alphanumeric characters in '" + manifest_path + "'");
+            while (1) {
+                std::string type;
+                char current = pb.get();
+                while (current != '\n') {
+                    if ((current >= 'a' && current <= 'z') || (current >= 'A' && current <= 'Z') || (current >= '0' && current <= '9')) {
+                        type += current;
+                    } else {
+                        throw std::runtime_error("gene identifier type should only contain alphanumeric characters");
+                    }
+                    if (!pb.advance()) {
+                        throw std::runtime_error("premature termination");
+                    }
+                    current = pb.get();
                 }
+
+                if (type.size() == 0) {
+                    throw std::runtime_error("detected empty gene identifier type");
+                }
+                types.push_back(std::move(type));
+
                 if (!pb.advance()) {
-                    throw std::runtime_error("premature termination of gene identifier type in '" + manifest_path + "'");
+                    break;
                 }
-                current = pb.get();
             }
-
-            if (type.size() == 0) {
-                throw std::runtime_error("empty gene identifier type in '" + manifest_path + "'");
-            }
-            types.push_back(std::move(type));
-
-            if (!pb.advance()) {
-                break;
-            }
+        } catch (...) {
+            std::throw_with_nested(std::runtime_error("failed to parse gene identifier types from 'gene-types.tsv'"));
         }
 
         return validate_genes(prefix + "gene-type-", types);

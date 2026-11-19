@@ -31,12 +31,12 @@ TEST(Tokenization, Generator) {
 }
 
 TEST(Tokenization, Checker) {
-    gesel::internal::check_tokens(std::vector<std::string>{ "alpha", "bravo", "charlie" }, "foobar.tsv");
-    gesel::internal::check_tokens(std::vector<std::string>{ "12", "345", "6-7" }, "foobar.tsv");
-    expect_error([&]() { gesel::internal::check_tokens(std::vector<std::string>{ "bravo", "alpha", "charlie" }, "foobar.tsv"); }, "sorted");
-    expect_error([&]() { gesel::internal::check_tokens(std::vector<std::string>{ "Alpha", "charlie" }, "foobar.tsv"); }, "alphabetical");
-    expect_error([&]() { gesel::internal::check_tokens(std::vector<std::string>{ "alpha bravo", "charlie" }, "foobar.tsv"); }, "alphabetical");
-    expect_error([&]() { gesel::internal::check_tokens(std::vector<std::string>{ "" }, "foobar.tsv"); }, "empty");
+    gesel::internal::check_tokens(std::vector<std::string>{ "alpha", "bravo", "charlie" });
+    gesel::internal::check_tokens(std::vector<std::string>{ "12", "345", "6-7" });
+    expect_error([&]() { gesel::internal::check_tokens(std::vector<std::string>{ "bravo", "alpha", "charlie" }); }, "sorted");
+    expect_error([&]() { gesel::internal::check_tokens(std::vector<std::string>{ "Alpha", "charlie" }); }, "alphabetical");
+    expect_error([&]() { gesel::internal::check_tokens(std::vector<std::string>{ "alpha bravo", "charlie" }); }, "alphabetical");
+    expect_error([&]() { gesel::internal::check_tokens(std::vector<std::string>{ "" }); }, "empty");
 }
 
 class TestValidateDatabase : public ::testing::Test {
@@ -233,7 +233,7 @@ TEST_F(TestValidateDatabase, SetFailures) {
 
         // Check the number of sets.
         quick_gzip_write(spath, "5\t5\n6\t6\n");
-        expect_error([&]() { gesel::validate_database(path + "/9606_", max_genes); }, "total number of sets");
+        expect_error([&]() { gesel::validate_database(path + "/9606_", max_genes); }, "number of sets");
 
         // Verify that the sets are indeed checked.
         quick_gzip_write(spath, "1\t1\n2\t2\n3\t3\n4\t4\n5\t5\n6\t6\n7\t7\n");
@@ -250,7 +250,7 @@ TEST_F(TestValidateDatabase, SetFailures) {
         expect_error([&]() { gesel::validate_database(path + "/9606_", max_genes); }, "lower-case");
 
         quick_gzip_write(spath, "a\t1\nb\t2\n");
-        expect_error([&]() { gesel::validate_database(path + "/9606_", max_genes); }, "different number of tokens");
+        expect_error([&]() { gesel::validate_database(path + "/9606_", max_genes); }, "number of tokens");
 
         std::vector<std::pair<std::string, std::string> > payloads = {
             { "alpha", "1" },
@@ -295,7 +295,7 @@ TEST_F(TestValidateDatabase, SetToGeneFailures) {
     {
         auto spath = path + "/9606_set2gene.tsv.ranges.gz";
         quick_gzip_write(spath, "1\n");
-        expect_error([&]() { gesel::validate_database(path + "/9606_", max_genes); }, "number of lines in 'set2gene");
+        expect_error([&]() { gesel::validate_database(path + "/9606_", max_genes); }, "number of lines does not match the number of sets");
     }
 
     mock_database(path, "9606_");
@@ -317,7 +317,7 @@ TEST_F(TestValidateDatabase, SetToGeneFailures) {
     {
         auto spath = path + "/9606_gene2set.tsv.ranges.gz";
         quick_gzip_write(spath, "1\n");
-        expect_error([&]() { gesel::validate_database(path + "/9606_", max_genes); }, "number of lines in 'gene2set");
+        expect_error([&]() { gesel::validate_database(path + "/9606_", max_genes); }, "number of lines does not match the total number of genes");
     }
 
     mock_database(path, "9606_");

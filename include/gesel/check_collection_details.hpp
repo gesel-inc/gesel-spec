@@ -5,6 +5,8 @@
 #include <cstdint>
 #include <vector>
 #include <cstddef>
+#include <stdexcept>
+#include <exception>
 
 #include "byteme/byteme.hpp"
 #include "sanisizer/sanisizer.hpp"
@@ -30,59 +32,140 @@ inline void check_collection_details(const std::string& path, const std::vector<
     const auto num_ranges = ranges.size();
 
     while (raw_valid) {
-        auto raw_pos = raw_p.position();
-        auto title = parse_string_field<FieldType::MIDDLE>(raw_p, raw_valid, path, line);
-        auto description = parse_string_field<FieldType::MIDDLE>(raw_p, raw_valid, path, line);
-        auto species = parse_integer_field<FieldType::MIDDLE>(raw_p, raw_valid, path, line);
-        auto maintainer = parse_string_field<FieldType::MIDDLE>(raw_p, raw_valid, path, line);
-        auto source = parse_string_field<FieldType::LAST>(raw_p, raw_valid, path, line);
-
         if (line >= num_ranges) {
-            throw std::runtime_error("number of lines in '" + path + "' exceeds that expected from its '*.ranges.gz' file " + append_line_number(line));
-        }
-        if (!sanisizer::is_equal(raw_p.position() - raw_pos - 1, ranges[line])) {
-            throw std::runtime_error("number of bytes per line in '" + path + "' is not the same as that expected from the '*.ranges.gz' file " + append_line_number(line));
+            throw std::runtime_error("number of lines is greater than that of the '*.ranges.gz' file");
         }
 
-        if (!gzip_valid) {
-            throw std::runtime_error("early termination of the Gzipped version of '" + path + "'");
-        }
+        try {
+            const auto raw_pos = raw_p.position();
 
-        auto gz_title = parse_string_field<FieldType::MIDDLE>(gzip_p, gzip_valid, path, line);
-        if (gz_title != title) {
-            throw std::runtime_error("different title in '" + path + "' compared to its Gzipped version " + append_line_number(line));
-        }
+            auto title = [&]{
+                try {
+                    return parse_string_field<FieldType::MIDDLE>(raw_p, raw_valid);
+                } catch (...) {
+                    std::throw_with_nested(std::runtime_error("failed to parse title"));
+                }
+            }();
 
-        auto gz_description = parse_string_field<FieldType::MIDDLE>(gzip_p, gzip_valid, path, line);
-        if (gz_description != description) {
-            throw std::runtime_error("different description in '" + path + "' compared to its Gzipped version " + append_line_number(line));
-        }
+            auto description = [&]{
+                try {
+                    return parse_string_field<FieldType::MIDDLE>(raw_p, raw_valid);
+                } catch (...) {
+                    std::throw_with_nested(std::runtime_error("failed to parse description"));
+                }
+            }();
 
-        auto gz_species = parse_integer_field<FieldType::MIDDLE>(gzip_p, gzip_valid, path, line);
-        if (gz_species != species) {
-            throw std::runtime_error("different species in '" + path + "' compared to its Gzipped version " + append_line_number(line));
-        }
+            auto species = [&]{
+                try {
+                    return parse_integer_field<FieldType::MIDDLE>(raw_p, raw_valid);
+                } catch (...) {
+                    std::throw_with_nested(std::runtime_error("failed to parse species"));
+                }
+            }();
 
-        auto gz_maintainer = parse_string_field<FieldType::MIDDLE>(gzip_p, gzip_valid, path, line);
-        if (gz_maintainer != maintainer) {
-            throw std::runtime_error("different maintainer in '" + path + "' compared to its Gzipped version " + append_line_number(line));
-        }
+            auto maintainer = [&]{
+                try {
+                    return parse_string_field<FieldType::MIDDLE>(raw_p, raw_valid);
+                } catch (...) {
+                    std::throw_with_nested(std::runtime_error("failed to parse maintainer"));
+                }
+            }();
 
-        auto gz_source = parse_string_field<FieldType::MIDDLE>(gzip_p, gzip_valid, path, line);
-        if (gz_source != source) {
-            throw std::runtime_error("different source in '" + path + "' compared to its Gzipped version " + append_line_number(line));
-        }
+            auto source = [&]{
+                try {
+                    return parse_string_field<FieldType::LAST>(raw_p, raw_valid);
+                } catch (...) {
+                    std::throw_with_nested(std::runtime_error("failed to parse source"));
+                }
+            }();
 
-        auto gz_number = parse_integer_field<FieldType::LAST>(gzip_p, gzip_valid, path, line);
-        if (gz_number != numbers[line]) {
-            throw std::runtime_error("different number in '" + path + ".gz' compared to its '*.ranges.gz' file " + append_line_number(line));
-        }
+            // We know that line < num_ranges at this point.
+            if (!sanisizer::is_equal(raw_p.position() - raw_pos - 1, ranges[line])) {
+                throw std::runtime_error("number of bytes is not the same as that expected from the '*.ranges.gz' file");
+            }
 
-        sanisizer::increment(line);
+            try {
+                if (!gzip_valid) {
+                    throw std::runtime_error("early termination of the Gzipped file");
+                }
+
+                auto gz_title = [&]{
+                    try {
+                        return parse_string_field<FieldType::MIDDLE>(gzip_p, gzip_valid);
+                    } catch (...) {
+                        std::throw_with_nested(std::runtime_error("failed to parse title")); 
+                    }
+                }();
+                if (gz_title != title) {
+                    throw std::runtime_error("title is different");
+                }
+
+                auto gz_description = [&]{
+                    try {
+                        return parse_string_field<FieldType::MIDDLE>(gzip_p, gzip_valid);
+                    } catch (...) {
+                        std::throw_with_nested(std::runtime_error("failed to parse description"));
+                    }
+                }();
+                if (gz_description != description) {
+                    throw std::runtime_error("description is different");
+                }
+
+                auto gz_species = [&]{
+                    try {
+                        return parse_integer_field<FieldType::MIDDLE>(gzip_p, gzip_valid);
+                    } catch (...) {
+                        std::throw_with_nested(std::runtime_error("failed to parse species"));
+                    }
+                }();
+                if (gz_species != species) {
+                    throw std::runtime_error("species is different");
+                }
+
+                auto gz_maintainer = [&]{
+                    try {
+                        return parse_string_field<FieldType::MIDDLE>(gzip_p, gzip_valid);
+                    } catch (...) {
+                        std::throw_with_nested(std::runtime_error("failed to parse maintainer"));
+                    }
+                }();
+                if (gz_maintainer != maintainer) {
+                    throw std::runtime_error("maintainer is different");
+                }
+
+                auto gz_source = [&]{
+                    try {
+                        return parse_string_field<FieldType::MIDDLE>(gzip_p, gzip_valid);
+                    } catch (...) {
+                        std::throw_with_nested(std::runtime_error("failed to parse source"));
+                    }
+                }();
+                if (gz_source != source) {
+                    throw std::runtime_error("source is different");
+                }
+
+                auto gz_number = [&]{
+                    try {
+                        return parse_integer_field<FieldType::LAST>(gzip_p, gzip_valid);
+                    } catch (...) {
+                        std::throw_with_nested(std::runtime_error("failed to parse number"));
+                    }
+                }();
+                if (gz_number != numbers[line]) {
+                    throw std::runtime_error("number of sets is not consistent with that in the '*.ranges.gz' file");
+                }
+            } catch (...) {
+                std::throw_with_nested(std::runtime_error("failed to compare the corresponding line in the Gzipped version of the file"));
+            }
+
+            sanisizer::increment(line);
+        } catch (...) {
+            std::throw_with_nested(std::runtime_error("failed to validate line " + to_string(line)));
+        }
     }
 
     if (line != num_ranges) {
-        throw std::runtime_error("number of lines in '" + path + "' is less than that expected from its '*.ranges.gz' file " + append_line_number(line));
+        throw std::runtime_error("number of lines is less than that expected from its '*.ranges.gz' file");
     }
 }
 

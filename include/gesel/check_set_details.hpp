@@ -5,6 +5,8 @@
 #include <cstdint>
 #include <vector>
 #include <cstddef>
+#include <exception>
+#include <stdexcept>
 
 #include "sanisizer/sanisizer.hpp"
 #include "byteme/byteme.hpp"
@@ -21,7 +23,7 @@ void check_set_details(const std::string& path, const std::vector<std::uint64_t>
     auto gzpath = path + ".gz";
     byteme::GzipFileReader gzip_r(gzpath.c_str(), {});
 
-    auto buffer_size = sanisizer::cap<std::size_t>(65536);
+    const auto buffer_size = sanisizer::cap<std::size_t>(65536);
     byteme::SerialBufferedReader<char, decltype(&raw_r)> raw_p(&raw_r, buffer_size);
     byteme::SerialBufferedReader<char, decltype(&gzip_r)> gzip_p(&gzip_r, buffer_size);
 
@@ -31,43 +33,84 @@ void check_set_details(const std::string& path, const std::vector<std::uint64_t>
     const auto num_ranges = ranges.size();
 
     while (raw_valid) {
-        auto raw_pos = raw_p.position();
-        auto name = parse_string_field<FieldType::MIDDLE>(raw_p, raw_valid, path, line);
-        auto description = parse_string_field<FieldType::LAST>(raw_p, raw_valid, path, line);
-
         if (line >= num_ranges) {
-            throw std::runtime_error("number of lines in '" + path + "' exceeds that expected from its '*.ranges.gz' file " + append_line_number(line));
-        }
-        if (!sanisizer::is_equal(raw_p.position() - raw_pos - 1, ranges[line])) {
-            throw std::runtime_error("number of bytes per line in '" + path + "' is not the same as that expected from the '*.ranges.gz' file " + append_line_number(line));
+            throw std::runtime_error("number of lines is greater than that of its '*.ranges.gz' file");
         }
 
-        if (!gzip_valid) {
-            throw std::runtime_error("early termination of the Gzipped version of '" + path + "'" + append_line_number(line));
+        try {
+            auto raw_pos = raw_p.position();
+
+            auto name = [&]{
+                try {
+                    return parse_string_field<FieldType::MIDDLE>(raw_p, raw_valid);
+                } catch (...) {
+                    std::throw_with_nested(std::runtime_error("failed to parse name"));
+                }
+            }();
+
+            auto description = [&]{
+                try {
+                    return parse_string_field<FieldType::LAST>(raw_p, raw_valid);
+                } catch (...) {
+                    std::throw_with_nested(std::runtime_error("failed to parse description"));
+                }
+            }();
+
+            if (!sanisizer::is_equal(raw_p.position() - raw_pos - 1, ranges[line])) {
+                throw std::runtime_error("number of bytes is not the same as that expected from the '*.ranges.gz' file");
+            }
+
+            try {
+                if (!gzip_valid) {
+                    throw std::runtime_error("early termination of the Gzipped file");
+                }
+
+                auto gz_name = [&]{
+                    try {
+                        return parse_string_field<FieldType::MIDDLE>(gzip_p, gzip_valid);
+                    } catch (...) {
+                        std::throw_with_nested(std::runtime_error("failed to parse name"));
+                    }
+                }();
+                if (gz_name != name) {
+                    throw std::runtime_error("name is different");
+                }
+
+                auto gz_description = [&]{
+                    try {
+                        return parse_string_field<FieldType::MIDDLE>(gzip_p, gzip_valid);
+                    } catch (...) {
+                        std::throw_with_nested(std::runtime_error("failed to parse description"));
+                    }
+                }();
+                if (gz_description != description) {
+                    throw std::runtime_error("description is different");
+                }
+
+                auto gz_size = [&]{
+                    try {
+                        return parse_integer_field<FieldType::LAST>(gzip_p, gzip_valid);
+                    } catch (...) {
+                        std::throw_with_nested(std::runtime_error("failed to parse size"));
+                    }
+                }();
+                if (gz_size != sizes[line]) {
+                    throw std::runtime_error("set size is not consistent with that in the '*.ranges.gz' file");
+                }
+            } catch (...) {
+                std::throw_with_nested(std::runtime_error("failed to compare the corresponding line in the Gzipped version of the file"));
+            }
+
+            extra(line, name, description);
+
+            sanisizer::increment(line);
+        } catch (...) {
+            std::throw_with_nested(std::runtime_error("failed to validate line " + to_string(line)));
         }
-
-        auto gz_name = parse_string_field<FieldType::MIDDLE>(gzip_p, gzip_valid, path, line);
-        if (gz_name != name) {
-            throw std::runtime_error("different name in '" + path + "' compared to its Gzipped version " + append_line_number(line));
-        }
-
-        auto gz_description = parse_string_field<FieldType::MIDDLE>(gzip_p, gzip_valid, path, line);
-        if (gz_description != description) {
-            throw std::runtime_error("different description in '" + path + "' compared to its Gzipped version " + append_line_number(line));
-        }
-
-        auto gz_size = parse_integer_field<FieldType::LAST>(gzip_p, gzip_valid, path, line);
-        if (gz_size != sizes[line]) {
-            throw std::runtime_error("different size in '" + path + ".gz' compared to its '*.ranges.gz' file " + append_line_number(line));
-        }
-
-        extra(line, name, description);
-
-        sanisizer::increment(line);
     }
 
     if (line != num_ranges) {
-        throw std::runtime_error("number of lines in '" + path + "' is less than that expected from its '*.ranges.gz' file " + append_line_number(line));
+        throw std::runtime_error("number of lines is less than that expected from its '*.ranges.gz' file");
     }
 }
 

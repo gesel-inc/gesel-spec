@@ -7,6 +7,7 @@
 #include <vector>
 #include <string>
 #include <stdexcept>
+#include <exception>
 #include <unordered_set>
 
 #include "byteme/byteme.hpp"
@@ -28,26 +29,37 @@ inline std::uint64_t check_genes(const std::string& path) {
     std::unordered_set<std::string> current_names;
 
     while (valid) {
-        if (pb.get() == '\n') {
-            valid = pb.advance();
-        } else {
-            current_names.clear();
-            do {
-                auto parsed = parse_string_field<FieldType::UNKNOWN>(pb, valid, path, line);
-                if (parsed.first == "") {
-                    throw std::runtime_error("empty name detected in '" + path + "' " + append_line_number(line)); 
-                }
-                if (current_names.find(parsed.first) != current_names.end()) {
-                    throw std::runtime_error("duplicated names detected in '" + path + "' " + append_line_number(line)); 
-                }
-                if (parsed.second) {
-                    break;
-                }
-                current_names.insert(parsed.first);
-            } while (true);
-        }
+        try {
+            if (pb.get() == '\n') {
+                valid = pb.advance();
+            } else {
+                current_names.clear();
+                do {
+                    auto parsed = [&]{
+                        try {
+                            return parse_string_field<FieldType::UNKNOWN>(pb, valid);
+                        } catch (...) {
+                            std::throw_with_nested(std::runtime_error("failed to parse gene name"));
+                        }
+                    }();
 
-        sanisizer::increment(line);
+                    if (parsed.first == "") {
+                        throw std::runtime_error("detected empty name");
+                    }
+                    if (current_names.find(parsed.first) != current_names.end()) {
+                        throw std::runtime_error("detected duplicated name '" + parsed.first + "'"); 
+                    }
+                    if (parsed.second) {
+                        break;
+                    }
+                    current_names.insert(parsed.first);
+                } while (true);
+            }
+
+            sanisizer::increment(line);
+        } catch (...) {
+            std::throw_with_nested(std::runtime_error("failed to validate line " + to_string(line)));
+        }
     }
 
     return line;
