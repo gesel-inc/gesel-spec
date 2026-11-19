@@ -21,35 +21,49 @@ protected:
 TEST_F(TestCheckIndices, Success) {
     auto path = temp_file_path("check_indices");
 
-    std::string payload = "0\t123\t45\n6\n780\t1\t234\t45\n\n67\t890\n";
-    quick_text_write(path, payload);
-    quick_gzip_write(path + ".gz", payload);
+    {
+        std::string payload = "0\t123\t45\n6\n780\t1\t234\t45\n\n67\t890\n";
+        quick_text_write(path, payload);
+        quick_gzip_write(path + ".gz", payload);
 
-    std::vector<uint64_t> ranges{ 8, 1, 12, 0, 6 };
-    check_indices<false>(path, 2000, ranges);
-    check_indices<true>(path, 2000, ranges);
+        std::vector<uint64_t> ranges{ 8, 1, 12, 0, 6 };
+        check_indices<false>(path, 2000, ranges);
+        check_indices<true>(path, 2000, ranges);
 
-    // Checking that the extra code is run.
-    gesel::internal::check_indices<false>(
-        path,
-        2000, 
-        ranges,
-        [&](uint64_t, const std::vector<uint64_t>& indices) {
-            for (size_t i = 1, end = indices.size(); i < end; ++i) {
-                if (indices[i] <= indices[i-1]) {
-                    throw std::runtime_error("indices should be strictly increasing");
+        // Checking that the extra code is run.
+        gesel::internal::check_indices<false>(
+            path,
+            2000, 
+            ranges,
+            [&](uint64_t, const std::vector<uint64_t>& indices) {
+                for (size_t i = 1, end = indices.size(); i < end; ++i) {
+                    if (indices[i] <= indices[i-1]) {
+                        throw std::runtime_error("indices should be strictly increasing");
+                    }
                 }
             }
-        }
-    );
+        );
+    }
 
     // Check that we correctly handle empty lines at the end.
-    std::string payload2 = "0\t123\t45\n6\n780\t1\t234\t45\n67\t890\n\n";
-    quick_text_write(path, payload2);
-    quick_gzip_write(path + ".gz", payload2);
+    {
+        std::string payload2 = "0\t123\t45\n6\n780\t1\t234\t45\n67\t890\n\n";
+        quick_text_write(path, payload2);
+        quick_gzip_write(path + ".gz", payload2);
 
-    ranges = std::vector<uint64_t>{ 8, 1, 12, 6, 0 };
-    check_indices<true>(path, 2000, ranges);
+        std::vector<std::uint64_t> ranges{ 8, 1, 12, 6, 0 };
+        check_indices<true>(path, 2000, ranges);
+    }
+
+    // Handles all-empty.
+    {
+        std::string payload2(10, '\n');
+        quick_text_write(path, payload2);
+        quick_gzip_write(path + ".gz", payload2);
+
+        std::vector<std::uint64_t> ranges(10);
+        check_indices<true>(path, 2000, ranges);
+    }
 }
 
 TEST_F(TestCheckIndices, RawFailure) {

@@ -117,22 +117,24 @@ void check_indices(const std::string& path, std::uint64_t index_limit, const std
                 }
             }
 
-            if (raw_indices.front() >= index_limit) {
-                throw std::runtime_error("detected out-of-range index");
-            }
-
             const auto num_indices = raw_indices.size();
-            for (I<decltype(num_indices)> i = 1; i < num_indices; ++i) {
-                auto& delta = raw_indices[i];
-                if (delta == 0) {
-                    throw std::runtime_error("detected duplicate index");
-                }
-                const auto prev = raw_indices[i - 1];
-                if (sanisizer::is_greater_than_or_equal(delta, index_limit - prev)) {
+            if (num_indices) {
+                if (raw_indices.front() >= index_limit) {
                     throw std::runtime_error("detected out-of-range index");
                 }
-                delta += prev;
+                for (I<decltype(num_indices)> i = 1; i < num_indices; ++i) {
+                    auto& delta = raw_indices[i];
+                    if (delta == 0) {
+                        throw std::runtime_error("detected duplicate index");
+                    }
+                    const auto prev = raw_indices[i - 1];
+                    if (sanisizer::is_greater_than_or_equal(delta, index_limit - prev)) {
+                        throw std::runtime_error("detected out-of-range index");
+                    }
+                    delta += prev;
+                }
             }
+
             extra(line, raw_indices);
 
             sanisizer::increment(line);
