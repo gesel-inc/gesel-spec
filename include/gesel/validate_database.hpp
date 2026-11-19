@@ -12,6 +12,8 @@
 #include <vector>
 #include <unordered_map>
 
+#include "sanisizer/sanisizer.hpp"
+
 /**
  * @file validate_database.hpp
  * @brief Validate database files.
@@ -24,9 +26,9 @@ namespace gesel {
  */
 namespace internal {
 
-inline void tokenize(uint64_t index, const std::string& text, std::unordered_map<std::string, std::vector<uint64_t> >& tokens_to_sets) {
+inline void tokenize(std::uint64_t index, const std::string& text, std::unordered_map<std::string, std::vector<std::uint64_t> >& tokens_to_sets) {
     std::string latest;
-    auto add = [&]() {
+    auto add = [&]() -> void {
         if (latest.size()) {
             auto& vec = tokens_to_sets[latest];
             if (vec.empty() || vec.back() != index) {
@@ -37,7 +39,10 @@ inline void tokenize(uint64_t index, const std::string& text, std::unordered_map
     };
 
     for (auto x : text) {
-        x = std::tolower(x);
+        // Avoid using std::tolower() as this is locale-dependent.
+        if (x >= 'A' && x <= 'Z') {
+            x += 32;
+        }
         if (invalid_token_character(x)) {
             add();
         } else {
@@ -49,7 +54,8 @@ inline void tokenize(uint64_t index, const std::string& text, std::unordered_map
 }
 
 inline void check_tokens(const std::vector<std::string>& tokens, const std::string& path) {
-    for (size_t t = 0, end = tokens.size(); t < end; ++t) {
+    const auto num_tokens = tokens.size();
+    for (I<decltype(num_tokens)> t = 0; t < num_tokens; ++t) {
         const auto& token = tokens[t];
         if (token.empty()) {
             throw std::runtime_error("token should not be an empty string in '" + path + "' " + append_line_number(t));
@@ -80,34 +86,34 @@ inline void check_tokens(const std::vector<std::string>& tokens, const std::stri
  * @param num_genes Total number of genes for this species.
  * This should be obtained from the accompanying gene annotation files, validated by `validate_genes()`.
  */
-inline void validate_database(const std::string& prefix, uint64_t num_genes) {
-    uint64_t total_sets = 0;
+inline void validate_database(const std::string& prefix, std::uint64_t num_genes) {
+    std::uint64_t total_sets = 0;
     {
         auto coll_info = internal::load_ranges_with_sizes(prefix + "collections.tsv.ranges.gz");
         internal::check_collection_details(prefix + "collections.tsv", coll_info.first, coll_info.second);
-        constexpr uint64_t limit = std::numeric_limits<uint64_t>::max();
         for (auto x : coll_info.second) {
-            if (limit - total_sets < x) {
-                throw std::runtime_error("64-bit unsigned integer overflow for the sum of the number of sets in 'collections.tsv.ranges.gz'");
+            auto added = sanisizer::sum_maybe<std::uint64_t>(total_sets, x);
+            if (!added.has_value()) {
+                throw std::runtime_error("integer overflow for the sum of the number of sets in 'collections.tsv.ranges.gz'");
             }
-            total_sets += x;
+            total_sets = *added;
         }
     }
 
-    std::vector<uint64_t> set_sizes;
+    std::vector<std::uint64_t> set_sizes;
     {
         auto set_info = internal::load_ranges_with_sizes(prefix + "sets.tsv.ranges.gz");
-        if (static_cast<uint64_t>(set_info.first.size()) != total_sets) {
+        if (!sanisizer::is_equal(set_info.first.size(), total_sets)) {
             throw std::runtime_error("total number of sets in 'sets.tsv' does not match with the reported number from 'collections.tsv.ranges.gz'");
         }
         set_sizes.swap(set_info.second);
 
-        std::unordered_map<std::string, std::vector<uint64_t> > token_n, token_d;
+        std::unordered_map<std::string, std::vector<std::uint64_t> > token_n, token_d;
         internal::check_set_details(
             prefix + "sets.tsv",
             set_info.first,
             set_sizes,
-            [&](uint64_t line, const std::string& name, const std::string& description) {
+            [&](std::uint64_t line, const std::string& name, const std::string& description) {
                 internal::tokenize(line, name, token_n);
                 internal::tokenize(line, description, token_d);
             }
@@ -130,13 +136,13 @@ inline void validate_database(const std::string& prefix, uint64_t num_genes) {
                 prefix + path,
                 total_sets,
                 tok_info.second,
-                [&](uint64_t line, const std::vector<uint64_t>& indices) {
+                [&](std::uint64_t line, const std::vector<std::uint64_t>& indices) {
                     const auto& tok = tok_info.first[line];
                     auto tIt = tokens.find(tok);
                     if (tIt == tokens.end()) {
                         throw std::runtime_error("token '" + tok + "' in '" + ranges_path + "' is not present in " + type + " in 'sets.tsv'");
                     }
-                    if (!internal::same_vectors(tIt->second, indices)) {
+                    if (tIt->second != indices) {
                         throw std::runtime_error("sets for token '" + tok + "' in '" + path + "' are inconsistent with " + type + " in 'sets.tsv'");
                     }
                 }
@@ -145,10 +151,10 @@ inline void validate_database(const std::string& prefix, uint64_t num_genes) {
     }
 
     // Check for correct mapping of sets to genes.
-    std::vector<std::vector<uint64_t> > reverse_map(num_genes);
+    std::vector<std::vector<std::uint64_t> > reverse_map(num_genes);
     {
         auto s2g_info = internal::load_ranges(prefix + "set2gene.tsv.ranges.gz");
-        if (s2g_info.size() != static_cast<size_t>(total_sets)) {
+        if (!sanisizer::is_equal(s2g_info.size(), total_sets)) {
             throw std::runtime_error("number of lines in 'set2gene.tsv.ranges.gz' does not match the total number of sets");
         }
 
@@ -156,8 +162,8 @@ inline void validate_database(const std::string& prefix, uint64_t num_genes) {
             prefix + "set2gene.tsv",
             num_genes,
             s2g_info,
-            [&](uint64_t line, const std::vector<uint64_t>& indices) {
-                if (static_cast<uint64_t>(indices.size()) != set_sizes[line]) {
+            [&](std::uint64_t line, const std::vector<std::uint64_t>& indices) {
+                if (!sanisizer::is_equal(indices.size(), set_sizes[line])) {
                     throw std::runtime_error("size of set " + std::to_string(line) + " from 'sets.tsv.ranges.gz' does not match with that in 'set2gene.tsv'");
                 }
                 for (auto i : indices) {
@@ -170,7 +176,7 @@ inline void validate_database(const std::string& prefix, uint64_t num_genes) {
     // And making sure that the reverse mapping is consistent.
     {
         auto g2s_info = internal::load_ranges(prefix + "gene2set.tsv.ranges.gz");
-        if (g2s_info.size() != static_cast<size_t>(num_genes)) {
+        if (!sanisizer::is_equal(g2s_info.size(), num_genes)) {
             throw std::runtime_error("number of lines in 'gene2set.tsv.ranges.gz' does not match the total number of genes");
         }
 
@@ -178,8 +184,8 @@ inline void validate_database(const std::string& prefix, uint64_t num_genes) {
             prefix + "gene2set.tsv",
             total_sets,
             g2s_info,
-            [&](uint64_t line, const std::vector<uint64_t>& indices) {
-                if (!internal::same_vectors(reverse_map[line], indices)) {
+            [&](std::uint64_t line, const std::vector<std::uint64_t>& indices) {
+                if (reverse_map[line] != indices) {
                     throw std::runtime_error("sets for gene " + std::to_string(line) + " in 'gene2set.tsv' are inconsistent with 'set2gene.tsv'");
                 }
             }

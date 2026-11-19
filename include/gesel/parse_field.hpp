@@ -2,8 +2,8 @@
 #define GESEL_PARSE_INTEGER_FIELD_HPP
 
 #include <type_traits>
-#include <limits>
 #include <cstdint>
+#include <cstddef>
 #include <string>
 #include <stdexcept>
 
@@ -16,14 +16,11 @@ namespace internal {
 enum class FieldType : char { LAST, MIDDLE, UNKNOWN }; 
 
 template<FieldType type_, class ByteSource_>
-typename std::conditional<type_ == FieldType::UNKNOWN, std::pair<uint64_t, bool>, uint64_t>::type
-parse_integer_field(ByteSource_& pb, bool& valid, const std::string& path, uint64_t line) {
-    constexpr uint64_t threshold = std::numeric_limits<uint64_t>::max() / 10;
-    constexpr uint64_t max_remainder = std::numeric_limits<uint64_t>::max() % 10;
-
-    uint64_t number = 0;
-    uint64_t ndigits = 0;
-    uint64_t has_leading_zero = false;
+typename std::conditional<type_ == FieldType::UNKNOWN, std::pair<std::uint64_t, bool>, std::uint64_t>::type
+parse_integer_field(ByteSource_& pb, bool& valid, const std::string& path, std::uint64_t line) {
+    std::uint64_t number = 0;
+    std::uint64_t ndigits = 0;
+    std::uint64_t has_leading_zero = false;
     bool terminated = false;
 
     do {
@@ -48,14 +45,12 @@ parse_integer_field(ByteSource_& pb, bool& valid, const std::string& path, uint6
             throw std::runtime_error("no terminating newline in '" + path + "' " + append_line_number(line));
         }
 
-        uint64_t delta = c - '0';
-        if (number == threshold && delta > max_remainder) {
+        const std::uint64_t delta = c - '0';
+        if (!add_next_digit(number, delta)) {
             throw std::runtime_error("integer overflow in '" + path + "' " + append_line_number(line));
         }
 
         has_leading_zero += (ndigits == 0 && delta == 0);
-        number *= 10;
-        number += delta;
         ++ndigits;
     } while (valid);
 
@@ -78,7 +73,7 @@ parse_integer_field(ByteSource_& pb, bool& valid, const std::string& path, uint6
 
 template<FieldType type_, class ByteSource_>
 typename std::conditional<type_ == FieldType::UNKNOWN, std::pair<std::string, bool>, std::string>::type
-parse_string_field(ByteSource_& pb, bool& valid, const std::string& path, uint64_t line) {
+parse_string_field(ByteSource_& pb, bool& valid, const std::string& path, std::uint64_t line) {
     std::string value;
     bool terminated = false;
 

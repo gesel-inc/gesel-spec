@@ -4,7 +4,9 @@
 #include <string>
 #include <cstdint>
 #include <vector>
+#include <cstddef>
 
+#include "sanisizer/sanisizer.hpp"
 #include "byteme/byteme.hpp"
 
 #include "parse_field.hpp"
@@ -14,18 +16,19 @@ namespace gesel {
 namespace internal {
 
 template<class Extra_>
-void check_set_details(const std::string& path, const std::vector<uint64_t>& ranges, const std::vector<uint64_t>& sizes, Extra_ extra) {
+void check_set_details(const std::string& path, const std::vector<std::uint64_t>& ranges, const std::vector<std::uint64_t>& sizes, Extra_ extra) {
     byteme::RawFileReader raw_r(path.c_str(), {});
     auto gzpath = path + ".gz";
     byteme::GzipFileReader gzip_r(gzpath.c_str(), {});
 
-    byteme::SerialBufferedReader<char, decltype(&raw_r)> raw_p(&raw_r, 65536);
-    byteme::SerialBufferedReader<char, decltype(&gzip_r)> gzip_p(&gzip_r, 65536);
+    auto buffer_size = sanisizer::cap<std::size_t>(65536);
+    byteme::SerialBufferedReader<char, decltype(&raw_r)> raw_p(&raw_r, buffer_size);
+    byteme::SerialBufferedReader<char, decltype(&gzip_r)> gzip_p(&gzip_r, buffer_size);
 
     bool raw_valid = raw_p.valid();
     bool gzip_valid = gzip_p.valid();
-    uint64_t line = 0;
-    const uint64_t num_ranges = ranges.size();
+    std::uint64_t line = 0;
+    const auto num_ranges = ranges.size();
 
     while (raw_valid) {
         auto raw_pos = raw_p.position();
@@ -35,7 +38,7 @@ void check_set_details(const std::string& path, const std::vector<uint64_t>& ran
         if (line >= num_ranges) {
             throw std::runtime_error("number of lines in '" + path + "' exceeds that expected from its '*.ranges.gz' file " + append_line_number(line));
         }
-        if (raw_p.position() - raw_pos - 1 != static_cast<size_t>(ranges[line])) {
+        if (!sanisizer::is_equal(raw_p.position() - raw_pos - 1, ranges[line])) {
             throw std::runtime_error("number of bytes per line in '" + path + "' is not the same as that expected from the '*.ranges.gz' file " + append_line_number(line));
         }
 
@@ -59,7 +62,8 @@ void check_set_details(const std::string& path, const std::vector<uint64_t>& ran
         }
 
         extra(line, name, description);
-        ++line;
+
+        sanisizer::increment(line);
     }
 
     if (line != num_ranges) {

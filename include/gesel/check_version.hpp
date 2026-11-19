@@ -9,6 +9,8 @@
 #include "byteme/byteme.hpp"
 #include "sanisizer/sanisizer.hpp"
 
+#include "utils.hpp"
+
 namespace gesel {
 
 namespace internal {
@@ -66,17 +68,17 @@ public:
 
 inline Version check_version(const std::string& version_path) {
     byteme::RawFileReader reader(version_path.c_str(), {});
-    std::vector<char> buffer(10);
+    constexpr std::size_t chunk_size = 10;
+    std::vector<char> buffer(chunk_size); 
     typename std::vector<char>::size_type offset = 0;
     while (1) {
-        const auto remaining = sanisizer::cast<std::size_t>(buffer.size() - offset);
-        const auto read = reader.read(reinterpret_cast<unsigned char*>(buffer.data() + offset), remaining);
-        if (read < remaining) {
+        const auto read = reader.read(reinterpret_cast<unsigned char*>(buffer.data() + offset), chunk_size);
+        if (read < chunk_size) {
             buffer.resize(offset + read);
             break;
         }
         offset = buffer.size();
-        buffer.insert(buffer.end(), 10, static_cast<char>(0));
+        buffer.insert(buffer.end(), chunk_size, static_cast<char>(0));
     }
 
     Version output;
@@ -98,6 +100,7 @@ inline Version check_version(const std::string& version_path) {
         if (limit <= position) {
             throw std::runtime_error("premature termination of the version string at '" + version_path + "'");
         }
+
         const auto start = buffer[position];
         if (start == '0') {
             ++position;
@@ -107,11 +110,13 @@ inline Version check_version(const std::string& version_path) {
                 throw std::runtime_error("leading zeros detected in the version string at '" + version_path + "'");
             }
             ++position;
+
         } else if (start > '0' && start <= '9') {
             auto current = start;
             while (1) {
-                target *= 10;
-                target += current - '0';
+                if (!add_next_digit(target, current - '0')) {
+                    throw std::runtime_error("overflow in version numbers at '" + version_path + "'");
+                }
                 ++position;
                 if (limit <= position) {
                     throw std::runtime_error("premature termination of the version string at '" + version_path + "'");
@@ -124,6 +129,7 @@ inline Version check_version(const std::string& version_path) {
                     throw std::runtime_error("non-digit characters detected in the version string at '" + version_path + "'");
                 }
             }
+
         } else if (start == term) {
             throw std::runtime_error("empty field in the version string at '" + version_path + "'");
         } else {

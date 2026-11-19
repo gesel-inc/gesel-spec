@@ -3,12 +3,14 @@
 
 #include <limits>
 #include <cstdint>
+#include <cstddef>
 #include <vector>
 #include <string>
 #include <stdexcept>
 #include <unordered_set>
 
 #include "byteme/byteme.hpp"
+#include "sanisizer/sanisizer.hpp"
 
 #include "parse_field.hpp"
 #include "utils.hpp"
@@ -17,14 +19,12 @@ namespace gesel {
 
 namespace internal {
 
-inline uint64_t check_genes(const std::string& path) {
+inline std::uint64_t check_genes(const std::string& path) {
     byteme::GzipFileReader reader(path.c_str(), {});
-    byteme::SerialBufferedReader<char, decltype(&reader)> pb(&reader, 65536);
-    std::vector<uint64_t> output;
+    byteme::SerialBufferedReader<char, decltype(&reader)> pb(&reader, sanisizer::cap<std::size_t>(65536));
 
     bool valid = pb.valid();
-    uint64_t line = 0;
-    constexpr uint64_t max_line = std::numeric_limits<uint64_t>::max();
+    std::uint64_t line = 0;
     std::unordered_set<std::string> current_names;
 
     while (valid) {
@@ -47,10 +47,7 @@ inline uint64_t check_genes(const std::string& path) {
             } while (true);
         }
 
-        if (line == max_line) {
-            throw std::runtime_error("number of lines should fit in a 32-bit integer"); 
-        }
-        ++line;
+        sanisizer::increment(line);
     }
 
     return line;

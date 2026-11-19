@@ -29,17 +29,17 @@ inline bool invalid_token_character(char x) {
 template<typename Input_>
 using I = std::remove_cv_t<std::remove_reference_t<Input_> >;
 
-template<typename Value_>
-bool same_vectors(const std::vector<Value_>& left, const std::vector<Value_>& right) {
-    const auto num_left = left.size();
-    if (num_left != right.size()) {
+template<typename Integer_>
+bool add_next_digit(Integer_& current, Integer_ delta) {
+    constexpr Integer_ div_limit = std::numeric_limits<Integer_>::max() / 10;
+    constexpr Integer_ add_limit = std::numeric_limits<Integer_>::max() % 10;
+
+    if (current >= div_limit && (current > div_limit || delta > add_limit)) { // most of the time we should fail the first condition.
         return false;
     }
-    for (size_t i = 0; i < num_left; ++i) {
-        if (left[i] != right[i]) {
-            return false;
-        }
-    }
+    
+    current *= 10;
+    current += delta;
     return true;
 }
 

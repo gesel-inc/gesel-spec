@@ -3,6 +3,7 @@
 
 #include <string>
 #include <cstdint>
+#include <cstddef>
 #include <vector>
 
 #include "byteme/byteme.hpp"
@@ -14,9 +15,9 @@ namespace gesel {
 namespace internal {
 
 template<bool has_gzip_, class Extra_>
-void check_indices(const std::string& path, uint64_t index_limit, const std::vector<uint64_t>& ranges, Extra_ extra) {
+void check_indices(const std::string& path, std::uint64_t index_limit, const std::vector<std::uint64_t>& ranges, Extra_ extra) {
     byteme::RawFileReader raw_r(path.c_str(), {});
-    auto gzpath = path + ".gz";
+    const auto gzpath = path + ".gz";
     auto gzip_r = [&]{
         if constexpr(has_gzip_) {
             return byteme::GzipFileReader(gzpath.c_str(), {});
@@ -25,10 +26,11 @@ void check_indices(const std::string& path, uint64_t index_limit, const std::vec
         }
     }();
 
-    byteme::SerialBufferedReader<char, decltype(&raw_r)> raw_p(&raw_r, 65536);
+    const auto buffer_size = sanisizer::cap<std::size_t>(65536);
+    byteme::SerialBufferedReader<char, decltype(&raw_r)> raw_p(&raw_r, buffer_size);
     auto gzip_p = [&]{
         if constexpr(has_gzip_) {
-            return byteme::SerialBufferedReader<char, decltype(&gzip_r)>(&gzip_r, 65536);
+            return byteme::SerialBufferedReader<char, decltype(&gzip_r)>(&gzip_r, buffer_size);
         } else {
             return false;
         }
@@ -43,35 +45,36 @@ void check_indices(const std::string& path, uint64_t index_limit, const std::vec
         }
     }();
 
-    std::vector<uint64_t> raw_indices;
-    typename std::conditional<has_gzip_, std::vector<uint64_t>, bool>::type gzip_indices;
-    uint64_t line = 0;
-    const uint64_t num_ranges = ranges.size();
+    std::vector<std::uint64_t> raw_indices;
+    typename std::conditional<has_gzip_, std::vector<std::uint64_t>, bool>::type gzip_indices;
+    std::uint64_t line = 0;
+    const auto num_ranges = ranges.size();
 
     while (raw_valid) {
         raw_indices.clear();
-        auto raw_pos = raw_p.position();
+        const auto raw_pos = raw_p.position();
 
         if (raw_p.get() != '\n') {
             do {
-                auto status = parse_integer_field<FieldType::UNKNOWN>(raw_p, raw_valid, path, line);
+                const auto status = parse_integer_field<FieldType::UNKNOWN>(raw_p, raw_valid, path, line);
                 raw_indices.push_back(status.first);
                 if (status.second) {
                     break;
                 }
             } while (true);
 
-            uint64_t cumulative = raw_indices.front();
+            auto cumulative = raw_indices.front();
             if (cumulative >= index_limit) {
                 throw std::runtime_error("out-of-range index in '" + path + "' (line " + std::to_string(line + 1) + ")");
             }
 
-            for (size_t i = 1, end = raw_indices.size(); i < end; ++i) {
-                auto delta = raw_indices[i];
+            const auto num_indices = raw_indices.size();
+            for (I<decltype(num_indices)> i = 1; i < num_indices; ++i) {
+                const auto delta = raw_indices[i];
                 if (delta == 0) {
                     throw std::runtime_error("duplicate index in '" + path + "' (line " + std::to_string(line + 1) + ")");
                 }
-                if (delta >= index_limit - cumulative) {
+                if (sanisizer::is_greater_than_or_equal(delta, index_limit - cumulative)) {
                     throw std::runtime_error("out-of-range index in '" + path + "' (line " + std::to_string(line + 1) + ")");
                 }
                 cumulative += delta;
@@ -80,10 +83,10 @@ void check_indices(const std::string& path, uint64_t index_limit, const std::vec
             raw_valid = raw_p.advance();
         }
 
-        if (line >= num_ranges) {
+        if (sanisizer::is_greater_than_or_equal(line, num_ranges)) {
             throw std::runtime_error("number of lines in '" + path + "' exceeds that expected from its '*.ranges.gz' file (line " + std::to_string(line + 1) + ")");
         }
-        if (raw_p.position() - raw_pos - 1 != static_cast<size_t>(ranges[line])) {
+        if (!sanisizer::is_equal(raw_p.position() - raw_pos - 1, ranges[line])) {
             throw std::runtime_error("number of bytes per line in '" + path + "' is not the same as that expected from the '*.ranges.gz' file (line " + std::to_string(line + 1) + ")");
         }
 
@@ -105,26 +108,21 @@ void check_indices(const std::string& path, uint64_t index_limit, const std::vec
                 gzip_valid = gzip_p.advance();
             }
 
-            size_t num_indices = raw_indices.size();
-            if (num_indices != gzip_indices.size()) {
+            if (raw_indices != gzip_indices) {
                 throw std::runtime_error("different indices between '" + path + "' and its Gzipped version (line " + std::to_string(line + 1) + ")");
-            }
-            for (size_t i = 0; i < num_indices; ++i) {
-                if (raw_indices[i] != gzip_indices[i]) {
-                    throw std::runtime_error("different indices between '" + path + "' and its Gzipped version (line " + std::to_string(line + 1) + ")");
-                }
             }
         }
 
-        for (size_t i = 1, end = raw_indices.size(); i < end; ++i) {
+        const auto num_indices = raw_indices.size();
+        for (I<decltype(num_indices)> i = 1; i < num_indices; ++i) {
             raw_indices[i] += raw_indices[i - 1];
         }
         extra(line, raw_indices);
 
-        ++line;
+        sanisizer::increment(line);
     }
 
-    if (line != num_ranges) {
+    if (!sanisizer::is_equal(line, num_ranges)) {
         throw std::runtime_error("number of lines in '" + path + "' is less than that expected from its '*.ranges.gz' file (line " + std::to_string(line + 1) + ")");
     }
 }

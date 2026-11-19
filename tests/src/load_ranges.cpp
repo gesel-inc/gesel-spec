@@ -41,11 +41,14 @@ TEST(LoadRanges, Failure) {
     quick_gzip_write(path, "0\n01\n2\n3\n4\n5\n6\n7\n8\n9\n");
     expect_error([&]() { gesel::internal::load_ranges(path); }, "leading zero");
 
-    quick_gzip_write(path, "0\n1\n18446744073709551616\n3\n4\n5\n6\n7\n8\n9\n");
+    quick_gzip_write(path, "0\n1\n50000000000000000000\n3\n4\n5\n6\n7\n8\n9\n");
+    expect_error([&]() { gesel::internal::load_ranges(path); }, "overflow");
+
+    quick_gzip_write(path, "0\n1\n18446744073709551616\n3\n4\n5\n6\n7\n8\n9\n"); // more precise overflow check.
     expect_error([&]() { gesel::internal::load_ranges(path); }, "overflow");
 
     quick_gzip_write(path, "0\n1\n18446744073709551615\n3\n4\n5\n6\n7\n8\n9\n");
-    expect_error([&]() { gesel::internal::load_ranges(path); }, "cumulative");
+    expect_error([&]() { gesel::internal::load_ranges(path); }, "sum of bytes");
 }
 
 TEST(LoadRangesWithSizes, Success) {

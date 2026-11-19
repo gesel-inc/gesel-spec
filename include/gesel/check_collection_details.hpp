@@ -4,8 +4,10 @@
 #include <string>
 #include <cstdint>
 #include <vector>
+#include <cstddef>
 
 #include "byteme/byteme.hpp"
+#include "sanisizer/sanisizer.hpp"
 
 #include "parse_field.hpp"
 
@@ -13,18 +15,19 @@ namespace gesel {
 
 namespace internal {
 
-inline void check_collection_details(const std::string& path, const std::vector<uint64_t>& ranges, const std::vector<uint64_t>& numbers) {
+inline void check_collection_details(const std::string& path, const std::vector<std::uint64_t>& ranges, const std::vector<std::uint64_t>& numbers) {
     byteme::RawFileReader raw_r(path.c_str(), {});
     auto gzpath = path + ".gz";
     byteme::GzipFileReader gzip_r(gzpath.c_str(), {});
 
-    byteme::SerialBufferedReader<char, decltype(&raw_r)> raw_p(&raw_r, 65536);
-    byteme::SerialBufferedReader<char, decltype(&gzip_r)> gzip_p(&gzip_r, 65536);
+    auto buffer_size = sanisizer::cap<std::size_t>(65536);
+    byteme::SerialBufferedReader<char, decltype(&raw_r)> raw_p(&raw_r, buffer_size);
+    byteme::SerialBufferedReader<char, decltype(&gzip_r)> gzip_p(&gzip_r, buffer_size);
 
     bool raw_valid = raw_p.valid();
     bool gzip_valid = gzip_p.valid();
-    uint64_t line = 0;
-    const uint64_t num_ranges = ranges.size();
+    std::uint64_t line = 0;
+    const auto num_ranges = ranges.size();
 
     while (raw_valid) {
         auto raw_pos = raw_p.position();
@@ -37,7 +40,7 @@ inline void check_collection_details(const std::string& path, const std::vector<
         if (line >= num_ranges) {
             throw std::runtime_error("number of lines in '" + path + "' exceeds that expected from its '*.ranges.gz' file " + append_line_number(line));
         }
-        if (raw_p.position() - raw_pos - 1 != static_cast<size_t>(ranges[line])) {
+        if (!sanisizer::is_equal(raw_p.position() - raw_pos - 1, ranges[line])) {
             throw std::runtime_error("number of bytes per line in '" + path + "' is not the same as that expected from the '*.ranges.gz' file " + append_line_number(line));
         }
 
@@ -75,7 +78,7 @@ inline void check_collection_details(const std::string& path, const std::vector<
             throw std::runtime_error("different number in '" + path + ".gz' compared to its '*.ranges.gz' file " + append_line_number(line));
         }
 
-        ++line;
+        sanisizer::increment(line);
     }
 
     if (line != num_ranges) {

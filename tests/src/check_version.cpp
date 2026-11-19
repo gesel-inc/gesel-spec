@@ -133,6 +133,13 @@ TEST(CheckVersion, Errors) {
     quick_text_write(path, "2.1.02");
     expect_error([&]() { gesel::internal::check_version(path); }, "leading zero");
 
+    // Overflow.
+    quick_text_write(path, "2.10000000000.2");
+    expect_error([&]() { gesel::internal::check_version(path); }, "overflow");
+
+    quick_text_write(path, "2.2147483648.2");
+    expect_error([&]() { gesel::internal::check_version(path); }, "overflow");
+
     // Premature termination.
     quick_text_write(path, "0");
     expect_error([&]() { gesel::internal::check_version(path); }, "premature termination");

@@ -10,6 +10,9 @@
 #include <vector>
 #include <stdexcept> 
 #include <filesystem>
+#include <optional>
+
+#include "sanisizer/sanisizer.hpp"
 
 /**
  * @file validate_genes.hpp
@@ -33,23 +36,25 @@ namespace gesel {
  * @return Number of genes.
  */
 inline std::uint64_t validate_genes(const std::string& prefix, const std::vector<std::string>& types) {
-    bool first = true;
-    uint64_t num_genes = 0;
+    std::optional<std::uint64_t> num_genes;
+
     for (auto t : types) {
         auto candidate = internal::check_genes(prefix + t + ".tsv.gz");
-        if (first) {
+        if (!num_genes.has_value()) {
             num_genes = candidate;
-            first = false;
-        } else if (candidate != num_genes) {
-            throw std::runtime_error("inconsistent number of genes between types (" + std::to_string(num_genes) + " for " + types.front() + ", " + std::to_string(candidate) + " for " + t + ")");
+        } else if (candidate != *num_genes) {
+            throw std::runtime_error(
+                "inconsistent number of genes between types (" + 
+                std::to_string(*num_genes) + " for " + types.front() + ", " +
+                std::to_string(candidate) + " for " + t + ")"
+            );
         }
     }
 
-    if (first) {
+    if (!num_genes.has_value()) {
         throw std::runtime_error("at least one gene name type should be present");
     }
-
-    return num_genes;
+    return *num_genes;
 }
 
 /**
@@ -88,7 +93,7 @@ inline std::uint64_t validate_genes(const std::string& prefix) {
             if (name.size() < 6) {
                 continue;
             }
-            size_t ext_loc = name.size() - 7;
+            const auto ext_loc = name.size() - 7;
             if (name.rfind(".tsv.gz", ext_loc) != ext_loc) {
                 continue;
             }
@@ -103,7 +108,7 @@ inline std::uint64_t validate_genes(const std::string& prefix) {
         // Each file is also prefixed with 'gene-type-' to avoid conflicts with Gesel database files.
         const auto manifest_path = prefix + "gene-types.tsv";
         byteme::RawFileReader reader(manifest_path.c_str(), {});
-        byteme::SerialBufferedReader<char, internal::I<decltype(&reader)> > pb(&reader, 65536);
+        byteme::SerialBufferedReader<char, internal::I<decltype(&reader)> > pb(&reader, sanisizer::cap<std::size_t>(65536));
         if (!pb.valid()) {
             throw std::runtime_error("expected at least one gene identifier type in '" + manifest_path + "'");
         }
